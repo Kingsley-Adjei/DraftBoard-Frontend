@@ -1,0 +1,154 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&display=swap');
+
+:root {
+  --brand:       #8C1A2E;
+  --brand-dark:  #6B1222;
+  --brand-light: #f3e8ea;
+  --text:        #1a1a1a;
+  --text-muted:  #6b7280;
+  --border:      #e2e4e9;
+  --bg:          #ffffff;
+  --valid:       #22c55e;
+  --error:       #ef4444;
+  --input-bg:    #f8f8fb;
+  --radius:      8px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; }
+
+/* ── Page: full viewport maroon bg ──────────────────────────────────────── */
+.db-page {
+  width: 100vw; height: 100vh;
+  background: var(--brand);
+  display: flex; align-items: center; justify-content: center;
+  position: fixed; inset: 0; overflow: hidden;
+}
+
+/* ── Floating card ───────────────────────────────────────────────────────── */
+.db-card-wrapper {
+  width: 88vw; max-width: 920px;
+  height: 86vh; max-height: 580px;
+  background: #fff; border-radius: 18px;
+  overflow: hidden; display: flex;
+  box-shadow: 0 28px 70px rgba(0,0,0,0.32);
+}
+
+/* ── Left panel ──────────────────────────────────────────────────────────── */
+.db-left {
+  flex: 1; position: relative;
+  background: url('https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=900&q=80') center/cover no-repeat;
+  display: flex; align-items: flex-end; padding: 2rem;
+  overflow: hidden;
+}
+.db-left-overlay {
+  position: absolute; inset: 0;
+  background: linear-gradient(to top, rgba(70,5,20,0.85) 0%, rgba(70,5,20,0.35) 55%, rgba(70,5,20,0.08) 100%);
+}
+.db-left-content { position: relative; z-index: 1; color: #fff; max-width: 400px; }
+
+.db-tagline { font-size: 1.15rem; font-weight: 300; line-height: 1.5; margin-bottom: 0.6rem; }
+.db-tagline strong { font-weight: 700; }
+.db-sub { font-size: 0.75rem; line-height: 1.6; opacity: 0.75; font-weight: 300; margin-bottom: 1.2rem; }
+.db-dots { display: flex; gap: 5px; }
+.db-dot { height: 5px; border-radius: 3px; width: 20px; background: rgba(255,255,255,0.35); transition: all 0.35s ease; }
+.db-dot.active { background: #fff; width: 30px; }
+
+/* ── Right panel ─────────────────────────────────────────────────────────── */
+.db-right {
+  width: 420px; min-width: 380px;
+  display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem 2rem; background: #fff;
+  overflow: hidden; /* NO scrollbar ever */
+}
+.db-card { width: 100%; }
+
+/* ── Header ──────────────────────────────────────────────────────────────── */
+.db-header { text-align: center; margin-bottom: 1rem; }
+.db-logo { font-size: 1.2rem; font-weight: 400; color: var(--text); letter-spacing: -0.01em; margin-bottom: 0.2rem; }
+.db-logo-d { font-family: 'Playfair Display', serif; font-style: italic; font-size: 1.4rem; color: var(--brand); }
+.db-sub-head { font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.75rem; }
+
+/* ── Step indicator ──────────────────────────────────────────────────────── */
+.db-steps { display: flex; align-items: center; justify-content: center; gap: 0; }
+.db-step-group { display: flex; align-items: center; }
+.db-step {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.78rem; font-weight: 600;
+  background: var(--border); color: var(--text-muted); transition: all 0.2s; flex-shrink: 0;
+}
+.db-step.active { background: var(--brand); color: #fff; box-shadow: 0 0 0 3px rgba(140,26,46,0.15); }
+.db-step.done   { background: var(--brand); color: #fff; }
+.db-step-line   { width: 28px; height: 2px; background: var(--border); transition: background 0.3s; }
+.db-step-line.filled { background: var(--brand); }
+
+/* ── Form ────────────────────────────────────────────────────────────────── */
+.db-form { display: flex; flex-direction: column; gap: 0.55rem; }
+.db-row  { display: grid; grid-template-columns: 1fr 1fr; gap: 0.55rem; }
+
+/* ── Field ───────────────────────────────────────────────────────────────── */
+.db-field { display: flex; flex-direction: column; gap: 0.25rem; }
+.db-label {
+  display: flex; align-items: center; gap: 4px;
+  font-size: 0.72rem; font-weight: 500; color: var(--text-muted);
+}
+.db-label-icon { width: 12px; height: 12px; display: flex; align-items: center; }
+.db-label-icon svg { width: 12px; height: 12px; color: var(--text-muted); }
+
+.db-input-wrap {
+  display: flex; align-items: center;
+  background: var(--input-bg); border: 1.5px solid var(--border);
+  border-radius: var(--radius); transition: border-color 0.2s, box-shadow 0.2s;
+}
+.db-input-wrap:focus-within { border-color: var(--brand); box-shadow: 0 0 0 2px rgba(140,26,46,0.08); background: #fff; }
+.db-input-wrap.valid { border-color: var(--valid); }
+.db-input-wrap.error { border-color: var(--error); box-shadow: 0 0 0 2px rgba(239,68,68,0.07); }
+
+.db-input-wrap input {
+  flex: 1; border: none; background: transparent;
+  padding: 0.5rem 0.7rem;
+  font-size: 0.82rem; font-family: 'DM Sans', sans-serif;
+  color: var(--text); outline: none; width: 100%;
+}
+.db-input-wrap input::placeholder { color: #b0b5c1; }
+
+.db-check { width: 18px; height: 18px; flex-shrink: 0; margin-right: 0.5rem; display: flex; align-items: center; }
+.db-check svg { width: 18px; height: 18px; }
+.db-right-slot { display: flex; align-items: center; padding-right: 0.4rem; }
+.db-eye { background: none; border: none; cursor: pointer; padding: 3px; color: var(--text-muted); display: flex; align-items: center; }
+.db-eye svg { width: 14px; height: 14px; }
+.db-eye:hover { color: var(--brand); }
+.db-error { font-size: 0.67rem; color: var(--error); padding-left: 2px; }
+
+/* ── Button ──────────────────────────────────────────────────────────────── */
+.db-btn {
+  width: 100%; background: var(--brand); color: #fff;
+  border: none; border-radius: var(--radius); padding: 0.7rem 1.5rem;
+  font-family: 'DM Sans', sans-serif; font-size: 0.85rem; font-weight: 600;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  gap: 7px; margin-top: 0.25rem; transition: background 0.2s, transform 0.1s;
+}
+.db-btn svg { width: 16px; height: 16px; }
+.db-btn:hover  { background: var(--brand-dark); }
+.db-btn:active { transform: scale(0.98); }
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+.db-signin { text-align: center; font-size: 0.73rem; color: var(--text-muted); margin-top: 0.15rem; }
+.db-signin a { color: var(--brand); font-weight: 600; text-decoration: none; }
+.db-signin a:hover { text-decoration: underline; }
+
+.db-footer-links {
+  display: flex; align-items: center; justify-content: center;
+  gap: 0.5rem; font-size: 0.67rem; color: var(--text-muted); margin-top: 0.25rem;
+}
+.db-footer-links a { color: var(--text-muted); text-decoration: none; }
+.db-footer-links a:hover { color: var(--brand); }
+.db-footer-links span { opacity: 0.5; }
+
+.db-link-btn {
+  background: none; border: none; cursor: pointer;
+  color: var(--brand); font-weight: 600; font-size: inherit;
+  font-family: inherit; padding: 0;
+}
+.db-link-btn:hover { text-decoration: underline; }
