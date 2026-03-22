@@ -3,6 +3,7 @@ import DashboardLayout from "./DashboardLayout";
 import { useToast } from "../../components/ui/Toast";
 import Companies from "./Companies";
 import Clients from "./Clients";
+import MeasurementSessions from "../measurement-sessions/Measurement-sessions";
 import "./Dashboard.css";
 
 const DUMMY_SESSIONS = [
@@ -650,12 +651,7 @@ function PageContent({ activePage, setActivePage }) {
     case "clients":
       return <Clients />;
     case "sessions":
-      return (
-        <PlaceholderPage
-          title="Sessions"
-          subtitle="View and manage all sessions"
-        />
-      );
+      return <MeasurementSessions />;
     case "templates":
       return (
         <PlaceholderPage

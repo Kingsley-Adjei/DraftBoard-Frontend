@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "../../components/ui/Toast";
 import "./DashboardLayout.css";
 
@@ -179,7 +180,8 @@ function Icon({ name }) {
   return <span className="db-icon">{icons[name]}</span>;
 }
 
-// ─── Sidebar ──────────────────────────────────────────────────────────────────
+// SIDEBAR
+
 function Sidebar({
   collapsed,
   setCollapsed,
@@ -187,6 +189,15 @@ function Sidebar({
   setActivePage,
   onLogout,
 }) {
+  const navigate = useNavigate();
+
+  const handleNavClick = (itemId) => {
+    if (itemId === "sessions") {
+      navigate("/measurement-sessions");
+    } else {
+      setActivePage(itemId);
+    }
+  };
   return (
     <aside className={`db-sidebar ${collapsed ? "collapsed" : ""}`}>
       <div className="db-sidebar-top">
@@ -209,7 +220,7 @@ function Sidebar({
             <button
               key={item.id}
               className={`db-nav-item ${activePage === item.id ? "active" : ""}`}
-              onClick={() => setActivePage(item.id)}
+              onClick={() => handleNavClick(item.id)}
               title={collapsed ? item.label : undefined}
             >
               <Icon name={item.icon} />
