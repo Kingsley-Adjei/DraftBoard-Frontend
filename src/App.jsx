@@ -8,6 +8,7 @@ import Notifications from "./pages/settings/Notifications";
 import Privacy from "./pages/settings/Privacy";
 import Security from "./pages/settings/Security";
 import Appearance from "./pages/settings/Appearance";
+import MeasurementSessionsPage from "./pages/measurement-sessions/MeasurementSessionsPage";
 
 function App() {
   return (
@@ -17,6 +18,7 @@ function App() {
         <Route path="/signin" element={<SignIn />} />
         <Route path="/register" element={<Register />} />
         <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/measurement-sessions" element={<MeasurementSessionsPage />} />
         <Route path="/settings" element={<General />} />
         <Route path="/settings/notifications" element={<Notifications />} />
         <Route path="/settings/privacy" element={<Privacy />} />
