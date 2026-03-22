@@ -150,7 +150,7 @@ const SessionCard = ({ session, onViewDetails }) => (
   </div>
 );
 
-// SESSION CARD - GRID VIEW
+// SESSION CARD 
 
 const GridSessionCard = ({ session, onViewDetails }) => (
   <div className="grid-session-card">
