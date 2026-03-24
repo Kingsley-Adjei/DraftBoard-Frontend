@@ -1,0 +1,362 @@
+/* Uses the same CSS variables as DashboardLayout.css:
+   --brand, --brand-dark, --brand-light, --text, --text-muted,
+   --border, --bg, --white, --radius                          */
+
+/* ── Page Header ─────────────────────────────────────────── */
+.sp-wrapper {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.sp-page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+
+.sp-page-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin: 0 0 0.2rem;
+  color: var(--text);
+}
+
+.sp-page-sub {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.sp-save-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--brand);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 9px 18px;
+  font-size: 0.845rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: "DM Sans", sans-serif;
+  transition: background 0.18s;
+  flex-shrink: 0;
+}
+
+.sp-save-btn:hover {
+  background: var(--brand-dark);
+}
+
+/* ── Body Layout ─────────────────────────────────────────── */
+.sp-body {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+/* ── Side Nav ────────────────────────────────────────────── */
+.sp-sidenav {
+  width: 185px;
+  flex-shrink: 0;
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  overflow: hidden;
+}
+
+.sp-sidenav-item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 11px 16px;
+  font-size: 0.845rem;
+  font-weight: 400;
+  text-align: left;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: var(--text-muted);
+  font-family: "DM Sans", sans-serif;
+  transition:
+    background 0.15s,
+    color 0.15s;
+  border-bottom: 1px solid var(--border);
+}
+
+.sp-sidenav-item:last-child {
+  border-bottom: none;
+}
+.sp-sidenav-item:hover {
+  background: var(--bg);
+  color: var(--text);
+}
+.sp-sidenav-item.active {
+  background: var(--brand);
+  color: #fff;
+  font-weight: 600;
+}
+
+/* ── Card ────────────────────────────────────────────────── */
+.sp-card {
+  flex: 1;
+  background: var(--white);
+  border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  padding: 22px 24px;
+}
+
+.sp-card-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  margin: 0 0 4px;
+  color: var(--text);
+}
+
+/* ── Row ─────────────────────────────────────────────────── */
+.sp-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.sp-row:last-of-type {
+  border-bottom: none;
+}
+
+.sp-row-info {
+  flex: 1;
+  padding-right: 20px;
+}
+
+.sp-row-title {
+  font-size: 0.845rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+
+.sp-row-desc {
+  font-size: 0.765rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.sp-row-control {
+  flex-shrink: 0;
+}
+
+/* ── Toggle ──────────────────────────────────────────────── */
+.sp-toggle {
+  position: relative;
+  display: inline-block;
+  width: 42px;
+  height: 22px;
+  cursor: pointer;
+}
+
+.sp-toggle input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.sp-slider {
+  position: absolute;
+  inset: 0;
+  background: #d1d5db;
+  border-radius: 22px;
+  transition: background 0.22s;
+}
+
+.sp-slider::before {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  left: 3px;
+  top: 3px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform 0.22s;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+.sp-toggle input:checked + .sp-slider {
+  background: var(--brand);
+}
+.sp-toggle input:checked + .sp-slider::before {
+  transform: translateX(20px);
+}
+
+/* ── Select ──────────────────────────────────────────────── */
+.sp-select {
+  padding: 6px 28px 6px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.82rem;
+  font-family: "DM Sans", sans-serif;
+  color: var(--text);
+  background: var(--bg)
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E")
+    no-repeat right 8px center;
+  appearance: none;
+  cursor: pointer;
+  outline: none;
+  transition:
+    border-color 0.18s,
+    box-shadow 0.18s;
+}
+
+.sp-select:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(140, 26, 46, 0.07);
+}
+
+/* ── General Form ────────────────────────────────────────── */
+.sp-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.sp-form-group {
+  margin-bottom: 16px;
+}
+
+.sp-label {
+  display: block;
+  font-size: 0.765rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  margin-bottom: 6px;
+}
+
+.sp-input {
+  width: 100%;
+  padding: 9px 12px;
+  background: var(--bg);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 0.845rem;
+  color: var(--text);
+  font-family: "DM Sans", sans-serif;
+  outline: none;
+  box-sizing: border-box;
+  transition:
+    border-color 0.18s,
+    box-shadow 0.18s;
+}
+
+.sp-input:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(140, 26, 46, 0.07);
+  background: var(--white);
+}
+
+/* ── Theme Buttons ───────────────────────────────────────── */
+.sp-theme-group {
+  display: flex;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.sp-theme-btn {
+  padding: 6px 14px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  border: none;
+  border-right: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: "DM Sans", sans-serif;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+.sp-theme-btn:last-child {
+  border-right: none;
+}
+.sp-theme-btn:hover {
+  background: #efefef;
+  color: var(--text);
+}
+.sp-theme-btn.active {
+  background: var(--brand);
+  color: #fff;
+}
+
+/* ── Privacy Info Section ────────────────────────────────── */
+.sp-info-section {
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.sp-info-section h3 {
+  font-size: 0.845rem;
+  font-weight: 600;
+  margin: 0 0 6px;
+  color: var(--text);
+}
+
+.sp-info-section p {
+  font-size: 0.765rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin: 0;
+}
+
+/* ── Danger Zone ─────────────────────────────────────────── */
+.sp-danger-zone {
+  margin-top: 24px;
+}
+
+.sp-danger-title {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: #dc2626;
+  margin-bottom: 12px;
+}
+
+.sp-danger-box {
+  background: #fff5f5;
+  border: 1.5px solid #fecaca;
+  border-radius: var(--radius);
+  padding: 18px;
+}
+
+.sp-delete-btn {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
+  padding: 9px 16px;
+  font-size: 0.845rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: "DM Sans", sans-serif;
+  margin-bottom: 10px;
+  transition: background 0.18s;
+}
+
+.sp-delete-btn:hover {
+  background: #b91c1c;
+}
+
+.sp-danger-warning {
+  font-size: 0.765rem;
+  color: #dc2626;
+  margin: 0;
+  line-height: 1.5;
+}

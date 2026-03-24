@@ -3,6 +3,7 @@ import DashboardLayout from "./DashboardLayout";
 import { useToast } from "../../components/ui/Toast";
 import Companies from "./Companies";
 import Clients from "./Clients";
+import SettingsPage from "./Settingspage";
 import "./Dashboard.css";
 
 const DUMMY_SESSIONS = [
@@ -672,7 +673,7 @@ function PageContent({ activePage, setActivePage }) {
         <PlaceholderPage title="Profile" subtitle="Your account settings" />
       );
     case "settings":
-      return <PlaceholderPage title="Settings" subtitle="App configuration" />;
+      return <SettingsPage />;
     default:
       return <DashboardHome setActivePage={setActivePage} />;
   }
