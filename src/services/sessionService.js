@@ -8,4 +8,6 @@ export const sessionService = {
   delete: (id) => api.delete(`/sessions/${id}`),
   getByClient: (clientId, params) =>
     api.get(`/sessions/client/${clientId}`, { params }),
+  search: (query, params) =>
+    api.get("/sessions/search", { params: { query, ...params } }),
 };
