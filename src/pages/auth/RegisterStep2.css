@@ -129,7 +129,6 @@ body {
 
 /* ── Header ──────────────────────────────────────────────────────────────── */
 .db-header {
-  margin-top: 27rem;
   text-align: center;
   margin-bottom: 1rem;
 }
@@ -591,7 +590,7 @@ body {
 }
 
 .db-btn-small {
-  padding: 0.5rem 1rem;
+  padding: 1rem 1rem;
   background: var(--brand);
   color: white;
   border: none;
@@ -600,6 +599,7 @@ body {
   font-size: 0.75rem;
   font-weight: 500;
   white-space: nowrap;
+  width: 100%;
 }
 
 .db-btn-small:hover {

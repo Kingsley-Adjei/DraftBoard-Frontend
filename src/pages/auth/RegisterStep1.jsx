@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import Logo from "../../assets/logo_black.png";
 import "./RegisterStep1.css";
 
 // ─── Step Indicator ───────────────────────────────────────────────────────────
@@ -238,9 +239,13 @@ export default function RegisterStep1({ onNext, defaultValues = {} }) {
         <div className="db-right">
           <div className="db-card">
             <div className="db-header">
-              <h1 className="db-logo">
-                Join us on <span className="db-logo-d">F</span>itFolio
-              </h1>
+              <div className="welcome-header">
+                <h1 className="db-logo">Join us on </h1>
+                <div className="img-container">
+                  <img src={Logo} alt="DraftBoard Logo" className="logo" />
+                  <h1 className="db-logo">raftBoard</h1>
+                </div>
+              </div>
               <p className="db-sub-head">Create an account to use FitFolio</p>
               <Steps current={1} />
             </div>

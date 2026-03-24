@@ -113,13 +113,10 @@ export default function RegisterStep3({
                     <option value="EMPLOYEE">Employee</option>
                     <option value="MANAGER">Manager</option>
                   </select>
-                  <button
-                    onClick={handleAddInvitation}
-                    className="db-btn-small"
-                  >
-                    Add
-                  </button>
                 </div>
+                <button onClick={handleAddInvitation} className="db-btn-small">
+                  Add
+                </button>
 
                 {invitations.length > 0 && (
                   <div className="db-invite-list">

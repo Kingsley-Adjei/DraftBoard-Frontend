@@ -1,4 +1,5 @@
 import { useState } from "react";
+import Logo from "../../assets/logo_black.png";
 import "./RegisterStep2.css";
 
 function Steps({ current }) {
@@ -186,11 +187,20 @@ export default function RegisterStep2({
 
         {/* Right Panel */}
         <div className="db-right">
-          <div className="db-card">
+          <div
+            className="db-card"
+            style={{
+              marginTop: "25rem",
+            }}
+          >
             <div className="db-header">
-              <h1 className="db-logo">
-                Create Your <span className="db-logo-d">F</span>itFolio Company
-              </h1>
+              <div className="welcome-header">
+                <h1 className="db-logo">Create Your </h1>
+                <div className="img-container">
+                  <img src={Logo} alt="DraftBoard Logo" className="logo" />
+                  <h1 className="db-logo">raftBoard Company</h1>
+                </div>
+              </div>
               <p className="db-sub-head">Set up your tailoring business</p>
               <Steps current={2} />
             </div>
