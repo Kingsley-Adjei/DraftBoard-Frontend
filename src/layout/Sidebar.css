@@ -1,3 +1,4 @@
+/* src/components/layout/Sidebar.css */
 .sidebar {
   width: 280px;
   height: 100vh;
@@ -11,33 +12,103 @@
   flex-direction: column;
   box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
   z-index: 1000;
-  overflow: hidden; /* Prevent overflow on main container */
+  overflow: hidden;
 }
 
+/* Collapsed state */
 .sidebar.collapsed {
-  width: 105px;
+  width: 110px;
 }
 
+.sidebar.collapsed .logo-text,
+.sidebar.collapsed .nav-label,
+.sidebar.collapsed .user-details,
+.sidebar.collapsed .company-switcher,
+.sidebar.collapsed .logout-btn span {
+  display: none;
+}
+
+.sidebar.collapsed .nav-item {
+  justify-content: center;
+  padding: 0.75rem;
+}
+
+.sidebar.collapsed .nav-icon {
+  margin: 0;
+}
+
+.sidebar.collapsed .user-info {
+  justify-content: center;
+  padding: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.sidebar.collapsed .user-avatar {
+  width: 40px;
+  height: 40px;
+  margin: 0;
+}
+
+.sidebar.collapsed .logout-btn {
+  justify-content: center;
+  padding: 0.75rem;
+}
+
+/* Mobile styles */
+.sidebar.mobile-open {
+  transform: translateX(0);
+}
+
+.mobile-menu-btn {
+  display: none;
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  z-index: 1001;
+  background: #8c1a2e;
+  color: white;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 999;
+}
+
+/* Sidebar Header */
 .sidebar-header {
   padding: 1.5rem;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-  flex-shrink: 0; /* Prevent header from shrinking */
+  flex-shrink: 0;
 }
 
 .logo {
   display: flex;
   align-items: center;
-  gap: 0rem;
   font-size: 1.5rem;
   font-weight: 700;
 }
 
 .logo-icon {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 50px;
+  height: 50px;
 }
 
 .logo-text {
@@ -45,38 +116,68 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  font-size: 1.5rem;
+  padding-top: 0.5rem;
 }
 
 .collapse-btn {
   background: rgba(255, 255, 255, 0.1);
   border: none;
   color: white;
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  margin-left: 1rem;
   transition: all 0.3s ease;
-  margin-left: 10px;
 }
 
 .collapse-btn:hover {
   background: rgba(255, 255, 255, 0.2);
 }
 
+/* Company Switcher */
+.company-switcher {
+  padding: 1rem 1rem 0 1rem;
+  flex-shrink: 0;
+}
+
+.company-select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 8px;
+  color: white;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.company-select:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.company-select option {
+  background: #6b1222;
+  color: white;
+}
+
+/* Navigation */
 .sidebar-nav {
   flex: 1;
   padding: 1.5rem 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.5rem;
-  overflow-y: hidden;
+  overflow-y: auto;
   overflow-x: hidden;
 }
 
-/* Custom scrollbar styling */
 .sidebar-nav::-webkit-scrollbar {
   width: 4px;
 }
@@ -91,16 +192,6 @@
   border-radius: 4px;
 }
 
-.sidebar-nav::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.5);
-}
-
-/* Firefox scrollbar styling */
-.sidebar-nav {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.3) rgba(255, 255, 255, 0.1);
-}
-
 .nav-item {
   display: flex;
   align-items: center;
@@ -110,6 +201,7 @@
   text-decoration: none;
   border-radius: 8px;
   transition: all 0.3s ease;
+  position: relative;
 }
 
 .nav-item:hover {
@@ -143,13 +235,72 @@
 .nav-label {
   font-size: 0.95rem;
   font-weight: 500;
+  white-space: nowrap;
 }
 
+/* Sidebar Footer */
 .sidebar-footer {
   padding: 1.5rem 1rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
-  flex-shrink: 0; /* Prevent footer from shrinking */
-  background: linear-gradient(180deg, #5a001f 0%, #7a0f33 100%); /* Match sidebar background */
+  flex-shrink: 0;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem;
+  margin-bottom: 0.5rem;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: all 0.3s ease;
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  background: linear-gradient(135deg, #d97a9a 0%, #a63a5f 100%);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  font-size: 1rem;
+  color: white;
+  text-transform: uppercase;
+  flex-shrink: 0;
+}
+
+.user-details {
+  flex: 1;
+  overflow: hidden;
+}
+
+.user-name {
+  display: block;
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-role {
+  display: block;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: capitalize;
+}
+
+.user-company {
+  display: block;
+  font-size: 0.7rem;
+  color: rgba(255, 255, 255, 0.5);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .logout-btn {
@@ -170,6 +321,7 @@
 .logout-btn:hover {
   background: rgba(239, 68, 68, 0.2);
   border-color: rgba(239, 68, 68, 0.3);
+  color: #f87171;
 }
 
 .logout-btn .nav-icon {
@@ -178,73 +330,6 @@
 
 .logout-btn:hover .nav-icon {
   color: #ef4444;
-}
-
-.sidebar.collapsed .logout-btn {
-  justify-content: center;
-  padding: 0.75rem;
-}
-
-/* User info section */
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem;
-  margin-bottom: 0.5rem;
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 8px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.user-avatar {
-  width: 40px;
-  height: 40px;
-  background: linear-gradient(135deg, #d97a9a 0%, #a63a5f 100%);
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-  font-size: 1rem;
-  color: white;
-  text-transform: uppercase;
-}
-
-.user-details {
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.user-name {
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: white;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.user-role {
-  font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.7);
-  text-transform: capitalize;
-}
-
-.sidebar.collapsed .user-info {
-  padding: 0.5rem;
-  justify-content: center;
-}
-
-.sidebar.collapsed .user-avatar {
-  width: 32px;
-  height: 32px;
-  font-size: 0.9rem;
-}
-
-.sidebar.collapsed .user-details {
-  display: none;
 }
 
 /* Logout Modal */
@@ -296,16 +381,16 @@
   border-radius: 8px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.3s ease;
+  transition: all 0.2s;
 }
 
 .btn-secondary {
-  background: #e5e7eb;
+  background: #f3f4f6;
   color: #374151;
 }
 
 .btn-secondary:hover {
-  background: #d1d5db;
+  background: #e5e7eb;
 }
 
 .btn-danger {
@@ -341,20 +426,44 @@
 /* Responsive */
 @media (max-width: 768px) {
   .sidebar {
-    width: 80px;
+    transform: translateX(-100%);
+    width: 280px;
   }
-  
+
+  .sidebar.mobile-open {
+    transform: translateX(0);
+  }
+
+  .mobile-menu-btn {
+    display: flex;
+  }
+
+  .sidebar-overlay {
+    display: block;
+  }
+
+  /* On mobile, collapsed state is ignored (or treated differently) */
   .sidebar.collapsed {
-    width: 0;
-    overflow: hidden;
+    width: 280px;
   }
-  
-  .logout-modal {
-    margin: 1rem;
-    padding: 1.5rem;
+
+  .sidebar.collapsed .logo-text,
+  .sidebar.collapsed .nav-label,
+  .sidebar.collapsed .user-details,
+  .sidebar.collapsed .company-switcher,
+  .sidebar.collapsed .logout-btn span {
+    display: block;
   }
-  
-  .logout-modal-actions {
-    flex-direction: column;
+
+  .sidebar.collapsed .nav-item {
+    justify-content: center;
+  }
+
+  .sidebar.collapsed .user-info {
+    justify-content: flex-start;
+  }
+
+  .sidebar.collapsed .logout-btn {
+    justify-content: flex-start;
   }
 }

@@ -1,0 +1,651 @@
+/* CompanyDetails.css */
+
+.company-details-page {
+  padding: 2rem;
+  animation: fadeIn 0.5s ease-out;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+/* Header Section */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.back-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6b7280;
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.3s ease;
+}
+
+.back-link:hover {
+  color: #A63A5F;
+}
+
+.header-actions {
+  display: flex;
+  gap: 1rem;
+}
+
+/* Company Header */
+.company-header {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+}
+
+.company-title {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.company-icon-large {
+  width: 70px;
+  height: 70px;
+  background: linear-gradient(135deg, #5A001F 0%, #A63A5F 100%);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 600;
+  color: white;
+  box-shadow: 0 10px 15px -3px rgba(166, 58, 95, 0.2);
+}
+
+.company-title h1 {
+  font-size: 2rem;
+  color: #1f2937;
+  margin: 0 0 0.25rem 0;
+}
+
+.business-number {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.company-quick-info {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: #4b5563;
+  font-size: 0.95rem;
+}
+
+.info-item svg {
+  color: #A63A5F;
+  font-size: 1.1rem;
+}
+
+.info-item a {
+  color: #A63A5F;
+  text-decoration: none;
+}
+
+.info-item a:hover {
+  text-decoration: underline;
+}
+
+/* Tabs */
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  border-bottom: 2px solid #e5e7eb;
+  margin-bottom: 2rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.tab {
+  padding: 0.75rem 1.5rem;
+  background: none;
+  border: none;
+  color: #6b7280;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  position: relative;
+  white-space: nowrap;
+  transition: color 0.3s ease;
+}
+
+.tab:hover {
+  color: #A63A5F;
+}
+
+.tab.active {
+  color: #A63A5F;
+}
+
+.tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -0.5rem;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #A63A5F;
+  border-radius: 2px;
+}
+
+/* Tab Content */
+.tab-content {
+  min-height: 400px;
+}
+
+/* Overview Tab */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+
+.info-card {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  border: 1px solid #e5e7eb;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.info-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(166, 58, 95, 0.1);
+  border-color: #D97A9A;
+}
+
+.info-card h3 {
+  margin: 0 0 1.5rem 0;
+  color: #1f2937;
+  font-size: 1.1rem;
+  font-weight: 600;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid #f3f4f6;
+}
+
+.info-row {
+  display: flex;
+  margin-bottom: 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px dashed #f3f4f6;
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.info-row .label {
+  width: 120px;
+  color: #6b7280;
+  font-size: 0.95rem;
+}
+
+.info-row .value {
+  flex: 1;
+  color: #1f2937;
+  font-weight: 500;
+}
+
+.stat-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  background: #f9fafb;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  transition: background 0.3s ease;
+}
+
+.stat-item:hover {
+  background: #f5d7e3;
+}
+
+.stat-item svg {
+  font-size: 1.5rem;
+  color: #A63A5F;
+}
+
+.stat-item div {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-value {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #1f2937;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  color: #6b7280;
+}
+
+/* Members Tab */
+.tab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.5rem;
+}
+
+.tab-header h3 {
+  margin: 0;
+  color: #1f2937;
+  font-size: 1.25rem;
+}
+
+.members-list {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid #e5e7eb;
+}
+
+.member-item {
+  display: flex;
+  align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+  transition: background 0.3s ease;
+}
+
+.member-item:last-child {
+  border-bottom: none;
+}
+
+.member-item:hover {
+  background: #f9fafb;
+}
+
+.member-avatar {
+  width: 45px;
+  height: 45px;
+  background: linear-gradient(135deg, #5A001F 0%, #A63A5F 100%);
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-weight: 600;
+  font-size: 1.1rem;
+  margin-right: 1rem;
+}
+
+.member-info {
+  flex: 1;
+}
+
+.member-info h4 {
+  margin: 0 0 0.25rem 0;
+  color: #1f2937;
+  font-size: 1rem;
+}
+
+.member-info p {
+  margin: 0;
+  color: #6b7280;
+  font-size: 0.9rem;
+}
+
+.member-role {
+  margin-right: 2rem;
+}
+
+.role-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  background: #f3f4f6;
+  border-radius: 9999px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #1f2937;
+  border: 1px solid #e5e7eb;
+}
+
+.member-status {
+  margin-right: 1rem;
+}
+
+.more-btn {
+  background: none;
+  border: none;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 0.5rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.3s ease;
+}
+
+.more-btn:hover {
+  background: #f3f4f6;
+  color: #A63A5F;
+}
+
+/* Sessions Tab */
+.sessions-tab {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.sessions-tab h3 {
+  margin: 0 0 1.5rem 0;
+  color: #1f2937;
+  font-size: 1.1rem;
+}
+
+.sessions-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.sessions-table th {
+  text-align: left;
+  padding: 1rem;
+  background: #f9fafb;
+  color: #1f2937;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.sessions-table td {
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  color: #4b5563;
+}
+
+.sessions-table tr:hover td {
+  background: #f9fafb;
+}
+
+.view-link {
+  color: #A63A5F;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 500;
+  padding: 0.25rem 0.75rem;
+  border-radius: 4px;
+  background: #f3f4f6;
+  transition: all 0.3s ease;
+}
+
+.view-link:hover {
+  background: #A63A5F;
+  color: white;
+}
+
+/* Settings Tab */
+.settings-tab {
+  max-width: 800px;
+}
+
+.settings-section {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  border: 1px solid #e5e7eb;
+}
+
+.settings-section h3 {
+  margin: 0 0 1rem 0;
+  color: #1f2937;
+  font-size: 1.1rem;
+}
+
+.danger-zone {
+  border: 1px solid #fee2e2;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.danger-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.5rem;
+  background: #fff5f5;
+  border-bottom: 1px solid #fee2e2;
+}
+
+.danger-item:last-child {
+  border-bottom: none;
+}
+
+.danger-item h4 {
+  margin: 0 0 0.25rem 0;
+  color: #991b1b;
+  font-size: 1rem;
+}
+
+.danger-item p {
+  margin: 0;
+  color: #b91c1c;
+  font-size: 0.9rem;
+  opacity: 0.8;
+}
+
+/* Badges */
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: capitalize;
+}
+
+.badge-success {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.badge-warning {
+  background: #fed7aa;
+  color: #92400e;
+}
+
+.badge-error {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.badge-info {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  border-radius: 8px;
+  font-weight: 500;
+  font-size: 0.9rem;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-primary {
+  background: #A63A5F;
+  color: white;
+}
+
+.btn-primary:hover {
+  background: #7A0F33;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px rgba(166, 58, 95, 0.2);
+}
+
+.btn-secondary {
+  background: white;
+  color: #A63A5F;
+  border: 1px solid #D97A9A;
+}
+
+.btn-secondary:hover {
+  background: #f5d7e3;
+}
+
+.btn-warning {
+  background: #f59e0b;
+  color: white;
+}
+
+.btn-warning:hover {
+  background: #d97706;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: white;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .company-details-page {
+    padding: 1.5rem;
+  }
+  
+  .info-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .company-details-page {
+    padding: 1rem;
+  }
+  
+  .company-title {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .company-quick-info {
+    grid-template-columns: 1fr;
+  }
+  
+  .tabs {
+    flex-wrap: wrap;
+  }
+  
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 0.75rem 0.5rem;
+  }
+  
+  .member-item {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  
+  .member-avatar {
+    margin-right: 0;
+  }
+  
+  .member-info {
+    width: 100%;
+    order: 2;
+  }
+  
+  .member-role, .member-status {
+    margin-right: 0;
+  }
+  
+  .danger-item {
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
+  }
+  
+  .sessions-table {
+    font-size: 0.9rem;
+  }
+  
+  .sessions-table th,
+  .sessions-table td {
+    padding: 0.75rem 0.5rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  
+  .header-actions {
+    width: 100%;
+  }
+  
+  .header-actions button {
+    width: 100%;
+  }
+  
+  .info-row {
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+  
+  .info-row .label {
+    width: 100%;
+  }
+  
+  .sessions-table {
+    display: block;
+    overflow-x: auto;
+  }
+}

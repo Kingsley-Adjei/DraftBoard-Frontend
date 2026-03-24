@@ -1,6 +1,7 @@
 // src/contexts/AuthContext.jsx
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { authService } from "../services/authService";
+import toast from "react-hot-toast";
 
 // Create context with a default value
 const AuthContext = createContext(null);
@@ -35,13 +36,25 @@ export const AuthProvider = ({ children }) => {
       try {
         const response = await authService.getCurrentUser();
         console.log("🔴 Auth check response:", response);
-        setUser(response.data.data);
+        const userData = response.data.data;
+
+        // Check if companyId exists in user data or localStorage
+        if (!userData.companyId) {
+          userData.companyId = localStorage.getItem("companyId");
+          userData.companyName = localStorage.getItem("companyName");
+        }
+
+        setUser(userData);
         setIsAuthenticated(true);
       } catch (error) {
         console.error("🔴 Auth check failed:", error);
+        // Clear invalid tokens
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
+        localStorage.removeItem("companyId");
+        localStorage.removeItem("companyName");
         setIsAuthenticated(false);
+        setUser(null);
       }
     }
     setLoading(false);
@@ -59,18 +72,26 @@ export const AuthProvider = ({ children }) => {
 
       localStorage.setItem("accessToken", token);
       localStorage.setItem("refreshToken", refreshToken);
-      localStorage.setItem("companyId", companyId || "");
-      localStorage.setItem("companyName", companyName || "");
+
+      if (companyId) {
+        localStorage.setItem("companyId", companyId);
+        localStorage.setItem("companyName", companyName || "");
+      }
 
       setUser(user);
       setIsAuthenticated(true);
 
+      toast.success(`Welcome back, ${user.firstName}!`);
       return { success: true, data: response.data.data };
     } catch (error) {
       console.error("🔴 Login error:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        "Login failed. Please check your credentials.";
+      toast.error(errorMessage);
       return {
         success: false,
-        message: error.response?.data?.message || "Login failed",
+        message: errorMessage,
       };
     }
   };
@@ -86,18 +107,28 @@ export const AuthProvider = ({ children }) => {
 
       localStorage.setItem("accessToken", token);
       localStorage.setItem("refreshToken", refreshToken);
-      localStorage.setItem("companyId", companyId || "");
-      localStorage.setItem("companyName", companyName || "");
+
+      if (companyId) {
+        localStorage.setItem("companyId", companyId);
+        localStorage.setItem("companyName", companyName || "");
+      }
 
       setUser(user);
       setIsAuthenticated(true);
 
+      toast.success(
+        `Welcome to FitFolio, ${user.firstName}! Please check your email to verify your account.`
+      );
       return { success: true, data: response.data.data };
     } catch (error) {
       console.error("🔴 Register error:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        "Registration failed. Please try again.";
+      toast.error(errorMessage);
       return {
         success: false,
-        message: error.response?.data?.message || "Registration failed",
+        message: errorMessage,
       };
     }
   };
@@ -119,10 +150,16 @@ export const AuthProvider = ({ children }) => {
 
     setUser(null);
     setIsAuthenticated(false);
+    toast.success("Logged out successfully");
   };
 
   const updateUser = (updatedUser) => {
     setUser(updatedUser);
+    // Update localStorage if needed
+    if (updatedUser.companyId) {
+      localStorage.setItem("companyId", updatedUser.companyId);
+      localStorage.setItem("companyName", updatedUser.companyName || "");
+    }
   };
 
   const value = {
@@ -138,6 +175,7 @@ export const AuthProvider = ({ children }) => {
   console.log("🔴 AuthProvider rendering with value:", {
     loading,
     isAuthenticated,
+    hasUser: !!user,
   });
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
