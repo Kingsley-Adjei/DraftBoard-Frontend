@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
-import "./SignIn.css";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../../contexts/AuthContext";
+import Logo from "../../assets/logo_black.png";
+import "./SignIn.css";
 
 const SLIDES = [
   {
@@ -8,11 +10,11 @@ const SLIDES = [
       "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=900&q=80",
     tagline: (
       <>
-        Welcome To <strong>DraftBoard</strong>, Where <strong>Tradition</strong>{" "}
+        Welcome To <strong>FitFolio</strong>, Where <strong>Tradition</strong>{" "}
         Meets <strong>Precision</strong> In Every <strong>Stitch</strong>
       </>
     ),
-    sub: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    sub: "Digitize your tailoring business, manage client measurements, and create perfect fits every time.",
   },
   {
     image:
@@ -22,7 +24,7 @@ const SLIDES = [
         Measure <strong>Once</strong>, Create <strong>Forever</strong>
       </>
     ),
-    sub: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    sub: "Store measurements securely, track client history, and deliver consistent quality with every order.",
   },
   {
     image:
@@ -33,7 +35,7 @@ const SLIDES = [
         <strong>One Measurement</strong> at a Time
       </>
     ),
-    sub: "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.",
+    sub: "Specialized support for Kaba, Slit, and traditional Ghanaian garments with precision measurement tools.",
   },
 ];
 
@@ -108,7 +110,9 @@ function Carousel() {
       {SLIDES.map((s, i) => (
         <div
           key={i}
-          className={`db-slide-bg ${i === current ? "active" : ""} ${animating && i === current ? "fading" : ""}`}
+          className={`db-slide-bg ${i === current ? "active" : ""} ${
+            animating && i === current ? "fading" : ""
+          }`}
           style={{ backgroundImage: `url(${s.image})` }}
         />
       ))}
@@ -132,6 +136,8 @@ function Carousel() {
 
 export default function SignIn() {
   const navigate = useNavigate();
+  const { login, isAuthenticated, loading: authLoading } = useAuth();
+
   const [form, setForm] = useState({
     email: "",
     password: "",
@@ -141,6 +147,14 @@ export default function SignIn() {
   const [showPassword, setShowPassword] = useState(false);
   const [submitAttempted, setSubmitAttempted] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [apiError, setApiError] = useState("");
+
+  // Redirect if already authenticated
+  useEffect(() => {
+    if (isAuthenticated && !authLoading) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, authLoading, navigate]);
 
   const validity = {
     email: validators.email(form.email),
@@ -154,21 +168,52 @@ export default function SignIn() {
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
+    // Clear API error when user starts typing
+    if (apiError) setApiError("");
   };
+
   const handleBlur = (e) =>
     setTouched((prev) => ({ ...prev, [e.target.name]: true }));
 
   const handleSubmit = async () => {
     setSubmitAttempted(true);
+    setApiError("");
+
     if (!validity.email || !validity.password) return;
+
     setIsLoading(true);
+
     try {
-      await new Promise((r) => setTimeout(r, 1200));
-      navigate("/dashboard");
+      const result = await login(form.email, form.password);
+
+      if (result.success) {
+        // Store remember me preference if checked
+        if (form.remember) {
+          localStorage.setItem("rememberEmail", form.email);
+        } else {
+          localStorage.removeItem("rememberEmail");
+        }
+
+        // Navigate to dashboard on success
+        navigate("/dashboard");
+      } else {
+        setApiError(result.message);
+      }
+    } catch (error) {
+      setApiError("An unexpected error occurred. Please try again.");
+      console.error("Login error:", error);
     } finally {
       setIsLoading(false);
     }
   };
+
+  // Load remembered email on component mount
+  useEffect(() => {
+    const rememberedEmail = localStorage.getItem("rememberEmail");
+    if (rememberedEmail) {
+      setForm((prev) => ({ ...prev, email: rememberedEmail, remember: true }));
+    }
+  }, []);
 
   return (
     <div className="db-page">
@@ -177,16 +222,25 @@ export default function SignIn() {
         <div className="db-right">
           <div className="db-card">
             <div className="db-header">
-              <h1 className="db-logo">
-                Sign in to <span className="db-logo-d">D</span>raftBoard
-              </h1>
+              <div className="welcome-header">
+                <h1 className="db-logo">Sign in to </h1>
+                <div className="img-container">
+                  <img src={Logo} alt="DraftBoard Logo" className="logo" />
+                  <h1 className="db-logo">raftBoard</h1>
+                </div>
+              </div>
+
               <p className="db-sub-head">
-                Enter your data to Sign into your account
+                Enter your credentials to access your account
               </p>
             </div>
 
             <div className="db-oauth">
-              <button className="db-oauth-btn google" type="button">
+              <button
+                className="db-oauth-btn google"
+                type="button"
+                disabled={isLoading}
+              >
                 <svg viewBox="0 0 24 24" className="db-oauth-icon">
                   <path
                     d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
@@ -207,7 +261,11 @@ export default function SignIn() {
                 </svg>
                 Sign in with Google
               </button>
-              <button className="db-oauth-btn apple" type="button">
+              <button
+                className="db-oauth-btn apple"
+                type="button"
+                disabled={isLoading}
+              >
                 <svg
                   viewBox="0 0 24 24"
                   className="db-oauth-icon"
@@ -225,9 +283,27 @@ export default function SignIn() {
               <span />
             </div>
 
+            {apiError && (
+              <div className="db-error-message">
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                {apiError}
+              </div>
+            )}
+
             <div
               className="db-form"
-              onKeyDown={(e) => e.key === "Enter" && handleSubmit()}
+              onKeyDown={(e) =>
+                e.key === "Enter" && !isLoading && handleSubmit()
+              }
             >
               <div className="db-field">
                 <label className="db-label">
@@ -245,7 +321,9 @@ export default function SignIn() {
                   Email
                 </label>
                 <div
-                  className={`db-input-wrap ${ft("email") && !validity.email ? "error" : ""}`}
+                  className={`db-input-wrap ${
+                    ft("email") && !validity.email ? "error" : ""
+                  }`}
                 >
                   <input
                     name="email"
@@ -255,6 +333,7 @@ export default function SignIn() {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     autoComplete="email"
+                    disabled={isLoading}
                   />
                 </div>
                 {ft("email") && !validity.email && (
@@ -278,7 +357,9 @@ export default function SignIn() {
                   Password
                 </label>
                 <div
-                  className={`db-input-wrap ${ft("password") && !validity.password ? "error" : ""}`}
+                  className={`db-input-wrap ${
+                    ft("password") && !validity.password ? "error" : ""
+                  }`}
                 >
                   <input
                     name="password"
@@ -288,6 +369,7 @@ export default function SignIn() {
                     onChange={handleChange}
                     onBlur={handleBlur}
                     autoComplete="current-password"
+                    disabled={isLoading}
                   />
                   <EyeIcon
                     visible={showPassword}
@@ -306,6 +388,7 @@ export default function SignIn() {
                     name="remember"
                     checked={form.remember}
                     onChange={handleChange}
+                    disabled={isLoading}
                   />
                   <span className="db-checkbox-custom" />
                   Remember me
@@ -344,6 +427,7 @@ export default function SignIn() {
                 <button
                   onClick={() => navigate("/register")}
                   className="db-link-btn"
+                  disabled={isLoading}
                 >
                   Create one
                 </button>

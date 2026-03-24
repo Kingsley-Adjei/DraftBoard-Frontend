@@ -1,26 +1,42 @@
+import { Link } from "react-router-dom";
 import { useState } from "react";
 import "./RegisterStep1.css";
 
-// ─── Validation ───────────────────────────────────────────────────────────────
-const validators = {
-  firstName: (v) => v.trim().length >= 2,
-  lastName: (v) => v.trim().length >= 2,
-  email: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()),
-  password: (v) => /^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(v),
-  confirmPassword: (v, form) => v === form.password && v.length > 0,
-  phone: (v) => /^\+\d{7,15}$/.test(v.replace(/\s/g, "")),
-};
+// ─── Step Indicator ───────────────────────────────────────────────────────────
+function Steps({ current }) {
+  return (
+    <div className="db-steps">
+      {[1, 2, 3].map((n, i) => (
+        <div key={n} className="db-step-group">
+          <div
+            className={`db-step ${n === current ? "active" : ""} ${
+              n < current ? "done" : ""
+            }`}
+          >
+            {n < current ? (
+              <svg viewBox="0 0 20 20" fill="none">
+                <path
+                  d="M4 10l4.5 4.5 7.5-7.5"
+                  stroke="#fff"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            ) : (
+              n
+            )}
+          </div>
+          {i < 2 && (
+            <div className={`db-step-line ${n < current ? "filled" : ""}`} />
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
 
-const errorMessages = {
-  firstName: "At least 2 characters",
-  lastName: "At least 2 characters",
-  email: "Enter a valid email address",
-  password: "Min 8 chars, include a letter and a number",
-  confirmPassword: "Passwords do not match",
-  phone: "Enter a valid phone number (e.g. +233 501234567)",
-};
-
-// ─── Field ────────────────────────────────────────────────────────────────────
+// ─── Field Component ─────────────────────────────────────────────────────────
 function Field({
   label,
   icon,
@@ -45,7 +61,9 @@ function Field({
         {label}
       </label>
       <div
-        className={`db-input-wrap ${showError ? "error" : ""} ${showCheck ? "valid" : ""}`}
+        className={`db-input-wrap ${showError ? "error" : ""} ${
+          showCheck ? "valid" : ""
+        }`}
       >
         <input
           type={type}
@@ -112,37 +130,8 @@ function EyeIcon({ visible, onClick }) {
   );
 }
 
-// ─── Steps ────────────────────────────────────────────────────────────────────
-function Steps({ current }) {
-  return (
-    <div className="db-steps">
-      {[1, 2, 3].map((n, i) => (
-        <div key={n} className="db-step-group">
-          <div
-            className={`db-step ${n === current ? "active" : ""} ${n < current ? "done" : ""}`}
-          >
-            {n}
-          </div>
-          {i < 2 && (
-            <div className={`db-step-line ${n < current ? "filled" : ""}`} />
-          )}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-// ─── Main ─────────────────────────────────────────────────────────────────────
+// ─── Main Component ───────────────────────────────────────────────────────────
 export default function RegisterStep1({ onNext, defaultValues = {} }) {
-  const fields = [
-    "firstName",
-    "lastName",
-    "email",
-    "password",
-    "confirmPassword",
-    "phone",
-  ];
-
   const [form, setForm] = useState({
     firstName: defaultValues.firstName || "",
     lastName: defaultValues.lastName || "",
@@ -157,16 +146,44 @@ export default function RegisterStep1({ onNext, defaultValues = {} }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [submitAttempted, setSubmitAttempted] = useState(false);
 
+  const validators = {
+    firstName: (v) => v.trim().length >= 2,
+    lastName: (v) => v.trim().length >= 2,
+    email: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim()),
+    password: (v) => /^(?=.*[A-Za-z])(?=.*\d).{8,}$/.test(v),
+    confirmPassword: (v) => v === form.password && v.length > 0,
+    phone: (v) => /^\+\d{7,15}$/.test(v.replace(/\s/g, "")),
+  };
+
+  const errorMessages = {
+    firstName: "At least 2 characters",
+    lastName: "At least 2 characters",
+    email: "Enter a valid email address",
+    password: "Min 8 chars, include a letter and a number",
+    confirmPassword: "Passwords do not match",
+    phone: "Enter a valid phone number (e.g. +233 501234567)",
+  };
+
+  const fields = [
+    "firstName",
+    "lastName",
+    "email",
+    "password",
+    "confirmPassword",
+    "phone",
+  ];
+
   const validity = {
     firstName: validators.firstName(form.firstName),
     lastName: validators.lastName(form.lastName),
     email: validators.email(form.email),
     password: validators.password(form.password),
-    confirmPassword: validators.confirmPassword(form.confirmPassword, form),
+    confirmPassword: validators.confirmPassword(form.confirmPassword),
     phone: validators.phone(form.phone),
   };
 
   const allValid = fields.every((f) => validity[f]);
+  const ft = (name) => touched[name] || submitAttempted;
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -192,24 +209,22 @@ export default function RegisterStep1({ onNext, defaultValues = {} }) {
     }
   };
 
-  const ft = (name) => touched[name] || submitAttempted;
-
   return (
     <div className="db-page">
       <div className="db-card-wrapper">
-        {/* Left */}
+        {/* Left Panel */}
         <div className="db-left">
           <div className="db-left-overlay" />
           <div className="db-left-content">
             <p className="db-tagline">
-              Welcome To <strong>DraftBoard</strong>, Where{" "}
+              Welcome To <strong>FitFolio</strong>, Where{" "}
               <strong>Tradition</strong>
               <br />
               Meets <strong>Precision</strong> In Every <strong>Stitch</strong>
             </p>
             <p className="db-sub">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do
-              eiusmod tempor incididunt ut labore et dolore magna aliqua.
+              Digitize your tailoring business, manage client measurements, and
+              create perfect fits every time.
             </p>
             <div className="db-dots">
               <span className="db-dot active" />
@@ -219,14 +234,14 @@ export default function RegisterStep1({ onNext, defaultValues = {} }) {
           </div>
         </div>
 
-        {/* Right */}
+        {/* Right Panel */}
         <div className="db-right">
           <div className="db-card">
             <div className="db-header">
               <h1 className="db-logo">
-                Join us on <span className="db-logo-d">D</span>raftBoard
+                Join us on <span className="db-logo-d">F</span>itFolio
               </h1>
-              <p className="db-sub-head">Create an account to use DraftBoard</p>
+              <p className="db-sub-head">Create an account to use FitFolio</p>
               <Steps current={1} />
             </div>
 
@@ -403,7 +418,7 @@ export default function RegisterStep1({ onNext, defaultValues = {} }) {
               </button>
 
               <p className="db-signin">
-                Already have an account? <a href="/login">Sign in</a>
+                Already have an account? <Link to="/login">Sign in</Link>
               </p>
               <div className="db-footer-links">
                 <a href="#">Privacy</a>
