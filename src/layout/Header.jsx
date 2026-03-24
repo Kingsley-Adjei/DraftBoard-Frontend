@@ -1,6 +1,15 @@
+// src/layout/Header.jsx
 import React, { useState, useRef, useEffect } from "react";
-import { FiSearch, FiBell, FiChevronDown } from "react-icons/fi";
+import {
+  FiSearch,
+  FiBell,
+  FiChevronDown,
+  FiUser,
+  FiSettings,
+  FiLogOut,
+} from "react-icons/fi";
 import { useAuth } from "../contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 import "./Header.css";
 
 const Header = () => {
@@ -9,7 +18,8 @@ const Header = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const menuRef = useRef(null);
   const notificationRef = useRef(null);
-  const { user } = useAuth();
+  const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   // Close dropdowns when clicking outside
   useEffect(() => {
@@ -30,9 +40,13 @@ const Header = () => {
 
   const handleSearch = (e) => {
     if (e.key === "Enter" && searchQuery.trim()) {
-      // Handle search - you can implement this later
       console.log("Searching for:", searchQuery);
     }
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    navigate("/signin");
   };
 
   // Get user initials for avatar
@@ -59,6 +73,7 @@ const Header = () => {
       </div>
 
       <div className="header-right">
+        {/* Notifications */}
         <div className="notifications" ref={notificationRef}>
           <button
             className="notification-btn"
@@ -107,6 +122,7 @@ const Header = () => {
           )}
         </div>
 
+        {/* Profile Menu */}
         <div className="profile-menu" ref={menuRef}>
           <button
             className="profile-btn"
@@ -138,15 +154,21 @@ const Header = () => {
                 </div>
               </div>
               <div className="dropdown-divider" />
-              <button className="dropdown-item" onClick={() => {}}>
+              <button
+                className="dropdown-item"
+                onClick={() => navigate("/profile")}
+              >
                 <FiUser /> Profile
               </button>
-              <button className="dropdown-item" onClick={() => {}}>
+              <button
+                className="dropdown-item"
+                onClick={() => navigate("/settings")}
+              >
                 <FiSettings /> Settings
               </button>
               <div className="dropdown-divider" />
-              <button className="dropdown-item danger" onClick={() => {}}>
-                Sign out
+              <button className="dropdown-item danger" onClick={handleLogout}>
+                <FiLogOut /> Sign out
               </button>
             </div>
           )}
