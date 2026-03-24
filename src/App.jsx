@@ -41,6 +41,7 @@ import ProtectedRoute from "./components/auth/ProtectedRoute";
 import "./App.css";
 
 // Layout wrapper component
+// Layout wrapper component - FIXED
 const AppLayout = () => {
   const { isAuthenticated, loading } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
@@ -61,44 +62,48 @@ const AppLayout = () => {
   return (
     <>
       <Sidebar collapsed={collapsed} setCollapsed={setCollapsed} />
-      <Header />
       <div className={`main-content ${collapsed ? "sidebar-collapsed" : ""}`}>
-        <Routes>
-          <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+        <Header />
+        <div className="content-wrapper fade-in">
+          {" "}
+          {/* Add this wrapper */}
+          <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/dashboard" element={<Dashboard />} />
 
-          {/* Company Routes */}
-          <Route path="/companies" element={<Companies />} />
-          <Route path="/companies/:id" element={<CompanyDetails />} />
+            {/* Company Routes */}
+            <Route path="/companies" element={<Companies />} />
+            <Route path="/companies/:id" element={<CompanyDetails />} />
 
-          {/* Client Routes */}
-          <Route path="/clients" element={<Clients />} />
-          <Route path="/clients/:id" element={<ClientDetails />} />
-          <Route path="/clients/new" element={<NewClient />} />
+            {/* Client Routes */}
+            <Route path="/clients" element={<Clients />} />
+            <Route path="/clients/:id" element={<ClientDetails />} />
+            <Route path="/clients/new" element={<NewClient />} />
 
-          {/* Session Routes */}
-          <Route path="/sessions" element={<Sessions />} />
-          <Route path="/sessions/new" element={<NewSession />} />
-          <Route path="/sessions/:id" element={<SessionDetails />} />
+            {/* Session Routes */}
+            <Route path="/sessions" element={<Sessions />} />
+            <Route path="/sessions/new" element={<NewSession />} />
+            <Route path="/sessions/:id" element={<SessionDetails />} />
 
-          {/* Template Routes */}
-          <Route path="/templates" element={<Templates />} />
-          <Route path="/templates/new" element={<TemplateBuilder />} />
-          <Route path="/templates/:id" element={<TemplateBuilder />} />
+            {/* Template Routes */}
+            <Route path="/templates" element={<Templates />} />
+            <Route path="/templates/new" element={<TemplateBuilder />} />
+            <Route path="/templates/:id" element={<TemplateBuilder />} />
 
-          {/* Report Routes */}
-          <Route path="/reports" element={<Reports />} />
+            {/* Report Routes */}
+            <Route path="/reports" element={<Reports />} />
 
-          {/* Admin Routes */}
-          <Route path="/admin/audit-logs" element={<AuditLogs />} />
+            {/* Admin Routes */}
+            <Route path="/admin/audit-logs" element={<AuditLogs />} />
 
-          {/* User Routes */}
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/settings" element={<Settings />} />
+            {/* User Routes */}
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/settings" element={<Settings />} />
 
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/dashboard" replace />} />
-        </Routes>
+            {/* Fallback */}
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
+        </div>
       </div>
     </>
   );
