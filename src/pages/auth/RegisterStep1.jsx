@@ -1,3 +1,4 @@
+// src/pages/auth/RegisterStep1.jsx
 import { Link } from "react-router-dom";
 import { useState } from "react";
 import Logo from "../../assets/logo_black.png";
@@ -132,7 +133,11 @@ function EyeIcon({ visible, onClick }) {
 }
 
 // ─── Main Component ───────────────────────────────────────────────────────────
-export default function RegisterStep1({ onNext, defaultValues = {} }) {
+export default function RegisterStep1({
+  onNext,
+  defaultValues = {},
+  isUpdating = false,
+}) {
   const [form, setForm] = useState({
     firstName: defaultValues.firstName || "",
     lastName: defaultValues.lastName || "",
@@ -200,13 +205,16 @@ export default function RegisterStep1({ onNext, defaultValues = {} }) {
     setTouched(allTouched);
     setSubmitAttempted(true);
     if (allValid && onNext) {
-      onNext({
+      const userData = {
         firstName: form.firstName,
         lastName: form.lastName,
         email: form.email,
         password: form.password,
         phone: form.phone,
-      });
+      };
+
+      // Pass the isUpdating flag to parent so it knows whether to POST or PUT
+      onNext(userData, isUpdating);
     }
   };
 
@@ -407,7 +415,7 @@ export default function RegisterStep1({ onNext, defaultValues = {} }) {
               />
 
               <button className="db-btn" onClick={handleNext}>
-                Next Step
+                {isUpdating ? "Update & Continue" : "Next Step"}
                 <svg
                   viewBox="0 0 24 24"
                   fill="none"

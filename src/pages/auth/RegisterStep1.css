@@ -387,3 +387,146 @@ body {
 .db-link-btn:hover {
   text-decoration: underline;
 }
+
+/* Add to your main CSS file or RegisterStep1.css */
+
+/* Error Modal Styles */
+.db-error-card {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 450px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+  animation: slideUp 0.3s ease;
+  margin: 0 auto;
+}
+
+.db-error-icon {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  animation: shake 0.5s ease;
+}
+
+.db-error-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #dc2626;
+  margin-bottom: 0.75rem;
+}
+
+.db-error-message {
+  color: #4b5563;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  margin-bottom: 1.5rem;
+  padding: 0.75rem;
+  background: #fef2f2;
+  border-radius: 12px;
+  border-left: 4px solid #dc2626;
+  text-align: left;
+  word-break: break-word;
+}
+
+.db-error-actions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.db-error-actions .db-btn {
+  flex: 1;
+  margin: 0;
+}
+
+.db-btn-secondary {
+  background: #f3f4f6;
+  color: #1f2937;
+  border: 1px solid #e5e7eb;
+}
+
+.db-btn-secondary:hover {
+  background: #e5e7eb;
+}
+
+.db-error-help {
+  font-size: 0.8rem;
+  color: #6b7280;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.db-error-help a {
+  color: var(--brand);
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.db-error-help a:hover {
+  text-decoration: underline;
+}
+
+/* Loading Card Styles */
+.db-loading-card {
+  background: white;
+  border-radius: 20px;
+  padding: 2rem;
+  max-width: 350px;
+  width: 90%;
+  text-align: center;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+}
+
+.db-loading-spinner {
+  width: 50px;
+  height: 50px;
+  border: 3px solid #f3e8ea;
+  border-top-color: var(--brand);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 1.5rem;
+}
+
+.db-loading-text {
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+}
+
+.db-loading-sub {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  75% {
+    transform: translateX(5px);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
