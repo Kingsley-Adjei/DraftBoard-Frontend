@@ -140,6 +140,11 @@
 
 /* Advanced Filters */
 .advanced-filters {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 2rem;
   background: white;
   border-radius: 16px;
   padding: 1.5rem;

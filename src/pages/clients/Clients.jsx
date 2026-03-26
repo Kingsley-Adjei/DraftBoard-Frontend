@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
 import toast from "react-hot-toast";
 import {
@@ -35,57 +35,77 @@ const Clients = () => {
     totalElements: 0,
   });
 
-  useEffect(() => {
-    fetchClients();
-  }, [pagination.page, filterGender, filterStatus]);
-
-  const fetchClients = async (showRefreshAnimation = false) => {
-    if (showRefreshAnimation) {
-      setRefreshing(true);
-    } else {
-      setLoading(true);
-    }
-
-    try {
-      const params = {
-        page: pagination.page,
-        size: pagination.size,
-        sortBy: "lastName",
-        sortDirection: "ASC",
-        gender: filterGender !== "all" ? filterGender : undefined,
-        status: filterStatus !== "all" ? filterStatus : undefined,
-      };
-      const response = await clientService.getAll(params);
-      const clientsData = response.data.data.content;
-      setClients(clientsData);
-      setPagination({
-        ...pagination,
-        totalPages: response.data.data.totalPages,
-        totalElements: response.data.data.totalElements,
-      });
-
-      // Fetch images for all clients
-      await fetchImagesForClients(clientsData);
-
+  const fetchClients = useCallback(
+    async (showRefreshAnimation = false) => {
       if (showRefreshAnimation) {
-        toast.success("Data refreshed successfully");
-      }
-    } catch (error) {
-      console.error("Failed to fetch clients:", error);
-      toast.error("Failed to load clients");
-    } finally {
-      if (showRefreshAnimation) {
-        setRefreshing(false);
+        setRefreshing(true);
       } else {
-        setLoading(false);
+        setLoading(true);
       }
-    }
-  };
+
+      try {
+        const params = {
+          page: pagination.page,
+          size: pagination.size,
+          sortBy: "lastName",
+          sortDirection: "ASC",
+        };
+
+        // Only add gender filter if not "all"
+        if (filterGender !== "all") {
+          params.gender = filterGender;
+        }
+
+        // Only add status filter if not "all"
+        if (filterStatus !== "all") {
+          params.status = filterStatus;
+        }
+
+        console.log("📊 Fetching clients with params:", params);
+        console.log(
+          "📊 Current filters - Gender:",
+          filterGender,
+          "Status:",
+          filterStatus
+        );
+
+        const response = await clientService.getAll(params);
+        console.log("📊 API Response:", response.data);
+
+        const clientsData = response.data.data.content;
+        console.log("📊 Number of clients received:", clientsData.length);
+
+        setClients(clientsData);
+        setPagination({
+          ...pagination,
+          totalPages: response.data.data.totalPages,
+          totalElements: response.data.data.totalElements,
+        });
+
+        // Fetch images for all clients
+        await fetchImagesForClients(clientsData);
+
+        if (showRefreshAnimation) {
+          toast.success("Data refreshed successfully");
+        }
+      } catch (error) {
+        console.error("❌ Failed to fetch clients:", error);
+        console.error("❌ Error details:", error.response?.data);
+        toast.error(error.response?.data?.message || "Failed to load clients");
+      } finally {
+        if (showRefreshAnimation) {
+          setRefreshing(false);
+        } else {
+          setLoading(false);
+        }
+      }
+    },
+    [pagination.page, pagination.size, filterGender, filterStatus]
+  );
 
   const fetchImagesForClients = async (clientsData) => {
     const imagesMap = {};
 
-    // Fetch images in parallel for better performance
     const imagePromises = clientsData.map(async (client) => {
       try {
         const response = await clientService.getImages(client.id);
@@ -93,7 +113,6 @@ const Clients = () => {
           (img) => img.imageType === "PROFILE"
         );
         if (profileImage) {
-          // Construct full image URL
           const imageUrl = profileImage.imageUrl.startsWith("http")
             ? profileImage.imageUrl
             : `http://localhost:8080${profileImage.imageUrl}`;
@@ -108,6 +127,11 @@ const Clients = () => {
     setClientImages(imagesMap);
   };
 
+  useEffect(() => {
+    console.log("🔄 useEffect triggered - filters changed");
+    fetchClients();
+  }, [fetchClients]);
+
   const handleRefresh = () => {
     fetchClients(true);
   };
@@ -119,11 +143,13 @@ const Clients = () => {
     }
     setLoading(true);
     try {
+      console.log("🔍 Searching for:", searchTerm);
       const response = await clientService.search(searchTerm, {
         page: 0,
         size: 20,
       });
       const searchResults = response.data.data.content;
+      console.log("🔍 Search results:", searchResults.length);
       setClients(searchResults);
       await fetchImagesForClients(searchResults);
     } catch (error) {
@@ -151,23 +177,39 @@ const Clients = () => {
     }
   };
 
+  const handleGenderFilterChange = (e) => {
+    const newGender = e.target.value;
+    console.log("🎯 Gender filter changed to:", newGender);
+    setFilterGender(newGender);
+    // Reset to first page when filter changes
+    setPagination((prev) => ({ ...prev, page: 0 }));
+  };
+
+  const handleStatusFilterChange = (e) => {
+    const newStatus = e.target.value;
+    console.log("🎯 Status filter changed to:", newStatus);
+    setFilterStatus(newStatus);
+    // Reset to first page when filter changes
+    setPagination((prev) => ({ ...prev, page: 0 }));
+  };
+
+  const handleClearFilters = () => {
+    console.log("🧹 Clearing all filters");
+    setFilterGender("all");
+    setFilterStatus("all");
+    setSearchTerm("");
+    // Reset to first page
+    setPagination((prev) => ({ ...prev, page: 0 }));
+  };
+
   const getGenderIcon = (gender) => {
     if (gender === "FEMALE") return "👩";
     if (gender === "MALE") return "👨";
     return "👤";
   };
 
-  // Filter clients for search term only (gender/status handled by API)
-  const filteredClients = clients.filter((client) => {
-    const fullName = `${client.firstName} ${client.lastName}`.toLowerCase();
-    const matchesSearch =
-      fullName.includes(searchTerm.toLowerCase()) ||
-      client.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.phoneNumber?.includes(searchTerm);
-    return matchesSearch;
-  });
+  const displayedClients = clients;
 
-  // Check if there are any clients at all (not just filtered results)
   const hasNoClients =
     !loading && !refreshing && pagination.totalElements === 0;
   const hasNoSearchResults =
@@ -179,9 +221,13 @@ const Clients = () => {
   const hasNoFilterResults =
     !loading &&
     !refreshing &&
-    filteredClients.length === 0 &&
+    clients.length === 0 &&
     !hasNoClients &&
-    !hasNoSearchResults;
+    !hasNoSearchResults &&
+    (filterGender !== "all" || filterStatus !== "all");
+
+  const activeFiltersCount =
+    (filterGender !== "all" ? 1 : 0) + (filterStatus !== "all" ? 1 : 0);
 
   return (
     <div className="clients-page">
@@ -224,6 +270,9 @@ const Clients = () => {
             onClick={() => setShowFilters(!showFilters)}
           >
             <FiFilter /> Filters
+            {activeFiltersCount > 0 && (
+              <span className="filter-badge">{activeFiltersCount}</span>
+            )}
           </button>
 
           <div className="view-toggle">
@@ -246,44 +295,45 @@ const Clients = () => {
       </div>
 
       {showFilters && (
-        <div className="advanced-filters">
-          <div className="filter-group">
-            <label>Gender:</label>
-            <select
-              value={filterGender}
-              onChange={(e) => setFilterGender(e.target.value)}
-            >
-              <option value="all">All Genders</option>
-              <option value="MALE">Male</option>
-              <option value="FEMALE">Female</option>
-              <option value="OTHER">Other</option>
-            </select>
-          </div>
+        <>
+          <div className="advanced-filters">
+            <div style={{
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "flex-start",
+              gap: "2rem",
+            }}>
+              <div className="filter-group">
+                <label>Gender:</label>
+                <select
+                  value={filterGender}
+                  onChange={handleGenderFilterChange}
+                >
+                  <option value="all">All Genders</option>
+                  <option value="MALE">Male</option>
+                  <option value="FEMALE">Female</option>
+                  <option value="OTHER">Other</option>
+                </select>
+              </div>
+              <div className="filter-group">
+                <label>Status:</label>
+                <select
+                  value={filterStatus}
+                  onChange={handleStatusFilterChange}
+                >
+                  <option value="all">All Status</option>
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                </select>
+              </div>
+            </div>
 
-          <div className="filter-group">
-            <label>Status:</label>
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value)}
-            >
-              <option value="all">All Status</option>
-              <option value="active">Active</option>
-              <option value="inactive">Inactive</option>
-            </select>
+            <button className="clear-filters" onClick={handleClearFilters}>
+              Clear Filters
+            </button>
           </div>
-
-          <button
-            className="clear-filters"
-            onClick={() => {
-              setFilterGender("all");
-              setFilterStatus("all");
-              setSearchTerm("");
-              fetchClients();
-            }}
-          >
-            Clear Filters
-          </button>
-        </div>
+        </>
       )}
 
       {loading || refreshing ? (
@@ -291,227 +341,126 @@ const Clients = () => {
           <div className="spinner"></div>
           <p>{refreshing ? "Refreshing data..." : "Loading clients..."}</p>
         </div>
-      ) : viewMode === "grid" ? (
-        <div className="clients-grid">
-          {filteredClients.map((client) => (
-            <div key={client.id} className="client-card">
-              <div className="client-card-header">
-                <div className="client-avatar" data-gender={client.gender}>
-                  {clientImages[client.id] ? (
-                    <img
-                      src={clientImages[client.id]}
-                      alt={`${client.firstName} ${client.lastName}`}
-                      style={{
-                        width: "100%",
-                        height: "100%",
-                        objectFit: "cover",
-                      }}
-                    />
-                  ) : (
-                    <>
-                      {client.firstName?.[0]}
-                      {client.lastName?.[0]}
-                    </>
-                  )}
-                </div>
-                <div className="client-status">
-                  <span className={`status-badge ${client.status || "active"}`}>
-                    {client.status || "active"}
-                  </span>
-                </div>
-                <button className="card-menu-btn">
-                  <FiMoreVertical />
-                </button>
-              </div>
-
-              <div className="client-card-body">
-                <h3>
-                  {client.firstName} {client.lastName}
-                </h3>
-                <p className="client-gender">
-                  {getGenderIcon(client.gender)}{" "}
-                  {client.gender || "Not specified"}
-                </p>
-
-                <div className="client-contact">
-                  <p>
-                    <FiMail /> {client.email || "—"}
-                  </p>
-                  <p>
-                    <FiPhone /> {client.phoneNumber || "—"}
-                  </p>
-                  <p>
-                    <FiMapPin /> {client.city || client.address || "—"}
-                  </p>
-                </div>
-
-                <div className="client-preferences">
-                  {client.preferredGarments?.map((garment, idx) => (
-                    <span key={idx} className="garment-tag">
-                      {garment}
-                    </span>
-                  ))}
-                </div>
-
-                <div className="client-stats">
-                  <div className="stat">
-                    <span className="stat-value">
-                      {client.sessionCount ||
-                        client.statistics?.totalSessions ||
-                        0}
-                    </span>
-                    <span className="stat-label">Sessions</span>
-                  </div>
-                  <div className="stat">
-                    <span className="stat-value">
-                      {client.lastSessionDate
-                        ? new Date(client.lastSessionDate).toLocaleDateString()
-                        : client.lastSession
-                        ? new Date(client.lastSession).toLocaleDateString()
-                        : "—"}
-                    </span>
-                    <span className="stat-label">Last Session</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className="client-card-footer">
-                <Link to={`/clients/${client.id}`} className="view-details">
-                  View Profile →
-                </Link>
-                <div className="client-actions">
-                  <Link to={`/clients/${client.id}/edit`} className="icon-btn">
-                    <FiEdit2 />
-                  </Link>
-                  <button
-                    className="icon-btn"
-                    onClick={() =>
-                      handleDelete(
-                        client.id,
-                        `${client.firstName} ${client.lastName}`
-                      )
-                    }
-                  >
-                    <FiTrash2 />
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
       ) : (
-        <div className="clients-table-container">
-          <table className="clients-table">
-            <thead>
-              <tr>
-                <th>Client</th>
-                <th>Contact</th>
-                <th>Location</th>
-                <th>Preferred Garments</th>
-                <th>Sessions</th>
-                <th>Last Session</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredClients.map((client) => (
-                <tr key={client.id}>
-                  <td>
-                    <div className="client-info">
-                      <div
-                        className="client-avatar-small"
-                        data-gender={client.gender}
-                      >
-                        {clientImages[client.id] ? (
-                          <img
-                            src={clientImages[client.id]}
-                            alt={`${client.firstName} ${client.lastName}`}
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              objectFit: "cover",
-                            }}
-                          />
-                        ) : (
-                          <>
-                            {client.firstName?.[0]}
-                            {client.lastName?.[0]}
-                          </>
-                        )}
-                      </div>
-                      <div>
-                        <div className="client-name">
-                          {client.firstName} {client.lastName}
-                        </div>
-                        <div className="client-gender-small">
-                          {getGenderIcon(client.gender)}{" "}
-                          {client.gender || "Not specified"}
-                        </div>
-                      </div>
-                    </div>
-                  </td>
-                  <td>
-                    <div className="contact-info">
-                      <div>{client.email || "—"}</div>
-                      <div className="phone">{client.phoneNumber || "—"}</div>
-                    </div>
-                  </td>
-                  <td>{client.city || client.address || "—"}</td>
-                  <td>
-                    <div className="garment-tags">
-                      {client.preferredGarments?.slice(0, 2).map((g, i) => (
-                        <span key={i} className="garment-tag-small">
-                          {g}
-                        </span>
-                      ))}
-                      {client.preferredGarments?.length > 2 && (
-                        <span className="garment-tag-small">
-                          +{client.preferredGarments.length - 2}
-                        </span>
+        <>
+          {/* Show active filter info */}
+          {activeFiltersCount > 0 && (
+            <div className="active-filters-info">
+              <span>Active filters: </span>
+              {filterGender !== "all" && (
+                <span className="active-filter-tag">
+                  Gender: {filterGender}
+                </span>
+              )}
+              {filterStatus !== "all" && (
+                <span className="active-filter-tag">
+                  Status: {filterStatus}
+                </span>
+              )}
+            </div>
+          )}
+
+          {viewMode === "grid" ? (
+            <div className="clients-grid">
+              {displayedClients.map((client) => (
+                <div key={client.id} className="client-card">
+                  <div className="client-card-header">
+                    <div className="client-avatar" data-gender={client.gender}>
+                      {clientImages[client.id] ? (
+                        <img
+                          src={clientImages[client.id]}
+                          alt={`${client.firstName} ${client.lastName}`}
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            objectFit: "cover",
+                          }}
+                        />
+                      ) : (
+                        <>
+                          {client.firstName?.[0]}
+                          {client.lastName?.[0]}
+                        </>
                       )}
                     </div>
-                  </td>
-                  <td>
-                    <span className="session-count">
-                      {client.sessionCount ||
-                        client.statistics?.totalSessions ||
-                        0}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="last-session">
-                      <FiCalendar />
-                      {client.lastSessionDate
-                        ? new Date(client.lastSessionDate).toLocaleDateString()
-                        : client.lastSession
-                        ? new Date(client.lastSession).toLocaleDateString()
-                        : "—"}
-                    </div>
-                  </td>
-                  <td>
-                    <span
-                      className={`status-badge ${client.status || "active"}`}
-                    >
-                      {client.status || "active"}
-                    </span>
-                  </td>
-                  <td>
-                    <div className="table-actions">
-                      <Link
-                        to={`/clients/${client.id}`}
-                        className="action-link"
+                    <div className="client-status">
+                      <span
+                        className={`status-badge ${client.status || "active"}`}
                       >
-                        View
-                      </Link>
+                        {client.status || "active"}
+                      </span>
+                    </div>
+                    <button className="card-menu-btn">
+                      <FiMoreVertical />
+                    </button>
+                  </div>
+
+                  <div className="client-card-body">
+                    <h3>
+                      {client.firstName} {client.lastName}
+                    </h3>
+                    <p className="client-gender">
+                      {getGenderIcon(client.gender)}{" "}
+                      {client.gender || "Not specified"}
+                    </p>
+
+                    <div className="client-contact">
+                      <p>
+                        <FiMail /> {client.email || "—"}
+                      </p>
+                      <p>
+                        <FiPhone /> {client.phoneNumber || "—"}
+                      </p>
+                      <p>
+                        <FiMapPin /> {client.city || client.address || "—"}
+                      </p>
+                    </div>
+
+                    <div className="client-preferences">
+                      {client.preferredGarments?.map((garment, idx) => (
+                        <span key={idx} className="garment-tag">
+                          {garment}
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className="client-stats">
+                      <div className="stat">
+                        <span className="stat-value">
+                          {client.sessionCount ||
+                            client.statistics?.totalSessions ||
+                            0}
+                        </span>
+                        <span className="stat-label">Sessions</span>
+                      </div>
+                      <div className="stat">
+                        <span className="stat-value">
+                          {client.lastSessionDate
+                            ? new Date(
+                                client.lastSessionDate
+                              ).toLocaleDateString()
+                            : client.lastSession
+                            ? new Date(client.lastSession).toLocaleDateString()
+                            : "—"}
+                        </span>
+                        <span className="stat-label">Last Session</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="client-card-footer">
+                    <Link to={`/clients/${client.id}`} className="view-details">
+                      View Profile →
+                    </Link>
+                    <div className="client-actions">
                       <Link
                         to={`/clients/${client.id}/edit`}
-                        className="action-btn-icon"
+                        className="icon-btn"
                       >
                         <FiEdit2 />
                       </Link>
                       <button
-                        className="action-btn-icon"
+                        className="icon-btn"
                         onClick={() =>
                           handleDelete(
                             client.id,
@@ -522,12 +471,147 @@ const Clients = () => {
                         <FiTrash2 />
                       </button>
                     </div>
-                  </td>
-                </tr>
+                  </div>
+                </div>
               ))}
-            </tbody>
-          </table>
-        </div>
+            </div>
+          ) : (
+            <div className="clients-table-container">
+              <table className="clients-table">
+                <thead>
+                  <tr>
+                    <th>Client</th>
+                    <th>Contact</th>
+                    <th>Location</th>
+                    <th>Preferred Garments</th>
+                    <th>Sessions</th>
+                    <th>Last Session</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {displayedClients.map((client) => (
+                    <tr key={client.id}>
+                      <td>
+                        <div className="client-info">
+                          <div
+                            className="client-avatar-small"
+                            data-gender={client.gender}
+                          >
+                            {clientImages[client.id] ? (
+                              <img
+                                src={clientImages[client.id]}
+                                alt={`${client.firstName} ${client.lastName}`}
+                                style={{
+                                  width: "100%",
+                                  height: "100%",
+                                  objectFit: "cover",
+                                }}
+                              />
+                            ) : (
+                              <>
+                                {client.firstName?.[0]}
+                                {client.lastName?.[0]}
+                              </>
+                            )}
+                          </div>
+                          <div>
+                            <div className="client-name">
+                              {client.firstName} {client.lastName}
+                            </div>
+                            <div className="client-gender-small">
+                              {getGenderIcon(client.gender)}{" "}
+                              {client.gender || "Not specified"}
+                            </div>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <div className="contact-info">
+                          <div>{client.email || "—"}</div>
+                          <div className="phone">
+                            {client.phoneNumber || "—"}
+                          </div>
+                        </div>
+                      </td>
+                      <td>{client.city || client.address || "—"}</td>
+                      <td>
+                        <div className="garment-tags">
+                          {client.preferredGarments?.slice(0, 2).map((g, i) => (
+                            <span key={i} className="garment-tag-small">
+                              {g}
+                            </span>
+                          ))}
+                          {client.preferredGarments?.length > 2 && (
+                            <span className="garment-tag-small">
+                              +{client.preferredGarments.length - 2}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td>
+                        <span className="session-count">
+                          {client.sessionCount ||
+                            client.statistics?.totalSessions ||
+                            0}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="last-session">
+                          <FiCalendar />
+                          {client.lastSessionDate
+                            ? new Date(
+                                client.lastSessionDate
+                              ).toLocaleDateString()
+                            : client.lastSession
+                            ? new Date(client.lastSession).toLocaleDateString()
+                            : "—"}
+                        </div>
+                      </td>
+                      <td>
+                        <span
+                          className={`status-badge ${
+                            client.status || "active"
+                          }`}
+                        >
+                          {client.status || "active"}
+                        </span>
+                      </td>
+                      <td>
+                        <div className="table-actions">
+                          <Link
+                            to={`/clients/${client.id}`}
+                            className="action-link"
+                          >
+                            View
+                          </Link>
+                          <Link
+                            to={`/clients/${client.id}/edit`}
+                            className="action-btn-icon"
+                          >
+                            <FiEdit2 />
+                          </Link>
+                          <button
+                            className="action-btn-icon"
+                            onClick={() =>
+                              handleDelete(
+                                client.id,
+                                `${client.firstName} ${client.lastName}`
+                              )
+                            }
+                          >
+                            <FiTrash2 />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
       )}
 
       {/* Empty State - No Clients at All */}
@@ -567,14 +651,7 @@ const Clients = () => {
         <div className="no-results">
           <FiFilter className="no-results-icon" />
           <p>No clients match the selected filters</p>
-          <button
-            className="btn btn-secondary"
-            onClick={() => {
-              setFilterGender("all");
-              setFilterStatus("all");
-              fetchClients();
-            }}
-          >
+          <button className="btn btn-secondary" onClick={handleClearFilters}>
             Clear Filters
           </button>
         </div>
