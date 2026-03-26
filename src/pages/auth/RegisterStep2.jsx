@@ -189,9 +189,6 @@ export default function RegisterStep2({
         <div className="db-right">
           <div
             className="db-card"
-            style={{
-              marginTop: "35rem",
-            }}
           >
             <div className="db-header">
               <div className="welcome-header">

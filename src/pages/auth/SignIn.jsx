@@ -220,12 +220,7 @@ export default function SignIn() {
       <div className="db-card-wrapper">
         <Carousel />
         <div className="db-right">
-          <div
-            className="db-card"
-            style={{
-              marginTop: "3rem",
-            }}
-          >
+          <div className="db-card">
             <div className="db-header">
               <div className="welcome-header">
                 <h1 className="db-logo">Sign in to </h1>

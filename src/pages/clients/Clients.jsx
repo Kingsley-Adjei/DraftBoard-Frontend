@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import toast from "react-hot-toast";
 import {
   FiPlus,
   FiEdit2,
@@ -11,83 +12,110 @@ import {
   FiCalendar,
   FiMapPin,
   FiMoreVertical,
+  FiUsers,
+  FiRefreshCw,
 } from "react-icons/fi";
+import { clientService } from "../../services/clientService";
 import "./Clients.css";
 
 const Clients = () => {
-  const [clients, setClients] = useState([
-    {
-      id: 1,
-      firstName: "Ama",
-      lastName: "Mensah",
-      email: "ama.mensah@email.com",
-      phone: "+233 24 123 4567",
-      gender: "FEMALE",
-      city: "Accra",
-      totalSessions: 8,
-      lastSession: "2024-02-15",
-      status: "active",
-      preferredGarments: ["KABA", "SLIT", "DRESS"],
-    },
-    {
-      id: 2,
-      firstName: "Kwame",
-      lastName: "Asante",
-      email: "kwame.asante@email.com",
-      phone: "+233 54 987 6543",
-      gender: "MALE",
-      city: "Kumasi",
-      totalSessions: 5,
-      lastSession: "2024-02-14",
-      status: "active",
-      preferredGarments: ["SHIRT", "TROUSER", "SUIT"],
-    },
-    {
-      id: 3,
-      firstName: "Esi",
-      lastName: "Owusu",
-      email: "esi.owusu@email.com",
-      phone: "+233 20 456 7890",
-      gender: "FEMALE",
-      city: "Takoradi",
-      totalSessions: 12,
-      lastSession: "2024-02-10",
-      status: "active",
-      preferredGarments: ["KABA", "SLIT", "DRESS", "SKIRT"],
-    },
-    {
-      id: 4,
-      firstName: "Yaw",
-      lastName: "Adjei",
-      email: "yaw.adjei@email.com",
-      phone: "+233 24 987 6543",
-      gender: "MALE",
-      city: "Accra",
-      totalSessions: 3,
-      lastSession: "2024-02-05",
-      status: "inactive",
-      preferredGarments: ["SHIRT", "TROUSER"],
-    },
-    {
-      id: 5,
-      firstName: "Abena",
-      lastName: "Nyarko",
-      email: "abena.nyarko@email.com",
-      phone: "+233 55 123 4567",
-      gender: "FEMALE",
-      city: "Cape Coast",
-      totalSessions: 15,
-      lastSession: "2024-02-12",
-      status: "active",
-      preferredGarments: ["KABA", "SLIT", "DRESS"],
-    },
-  ]);
-
+  const [clients, setClients] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [filterGender, setFilterGender] = useState("all");
   const [filterStatus, setFilterStatus] = useState("all");
-  const [viewMode, setViewMode] = useState("grid"); // grid or list
+  const [viewMode, setViewMode] = useState("grid");
   const [showFilters, setShowFilters] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [pagination, setPagination] = useState({
+    page: 0,
+    size: 12,
+    totalPages: 0,
+    totalElements: 0,
+  });
+
+  useEffect(() => {
+    fetchClients();
+  }, [pagination.page, filterGender, filterStatus]);
+
+  const fetchClients = async (showRefreshAnimation = false) => {
+    if (showRefreshAnimation) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
+
+    try {
+      const params = {
+        page: pagination.page,
+        size: pagination.size,
+        sortBy: "lastName",
+        sortDirection: "ASC",
+        gender: filterGender !== "all" ? filterGender : undefined,
+        status: filterStatus !== "all" ? filterStatus : undefined,
+      };
+      const response = await clientService.getAll(params);
+      setClients(response.data.data.content);
+      setPagination({
+        ...pagination,
+        totalPages: response.data.data.totalPages,
+        totalElements: response.data.data.totalElements,
+      });
+      if (showRefreshAnimation) {
+        toast.success("Data refreshed successfully");
+      }
+    } catch (error) {
+      console.error("Failed to fetch clients:", error);
+      toast.error("Failed to load clients");
+    } finally {
+      if (showRefreshAnimation) {
+        setRefreshing(false);
+      } else {
+        setLoading(false);
+      }
+    }
+  };
+
+  const handleRefresh = () => {
+    fetchClients(true);
+  };
+
+  const handleSearch = async () => {
+    if (!searchTerm.trim()) {
+      fetchClients();
+      return;
+    }
+    setLoading(true);
+    try {
+      const response = await clientService.search(searchTerm, {
+        page: 0,
+        size: 20,
+      });
+      setClients(response.data.data.content);
+    } catch (error) {
+      console.error("Search failed:", error);
+      toast.error("Search failed");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (id, name) => {
+    if (
+      window.confirm(
+        `Are you sure you want to delete ${name}? This action cannot be undone.`
+      )
+    ) {
+      try {
+        await clientService.delete(id);
+        toast.success(`${name} deleted successfully`);
+        fetchClients();
+      } catch (error) {
+        console.error("Delete failed:", error);
+        toast.error("Failed to delete client");
+      }
+    }
+  };
 
   const getGenderIcon = (gender) => {
     return gender === "FEMALE" ? "👩" : "👨";
@@ -97,18 +125,31 @@ const Clients = () => {
     return status === "active" ? "badge-success" : "badge-error";
   };
 
+  // Filter clients for search term only (gender/status handled by API)
   const filteredClients = clients.filter((client) => {
     const fullName = `${client.firstName} ${client.lastName}`.toLowerCase();
     const matchesSearch =
       fullName.includes(searchTerm.toLowerCase()) ||
-      client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      client.phone.includes(searchTerm);
-    const matchesGender =
-      filterGender === "all" || client.gender === filterGender;
-    const matchesStatus =
-      filterStatus === "all" || client.status === filterStatus;
-    return matchesSearch && matchesGender && matchesStatus;
+      client.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      client.phoneNumber?.includes(searchTerm);
+    return matchesSearch;
   });
+
+  // Check if there are any clients at all (not just filtered results)
+  const hasNoClients =
+    !loading && !refreshing && pagination.totalElements === 0;
+  const hasNoSearchResults =
+    !loading &&
+    !refreshing &&
+    clients.length === 0 &&
+    searchTerm &&
+    !hasNoClients;
+  const hasNoFilterResults =
+    !loading &&
+    !refreshing &&
+    filteredClients.length === 0 &&
+    !hasNoClients &&
+    !hasNoSearchResults;
 
   return (
     <div className="clients-page">
@@ -132,10 +173,20 @@ const Clients = () => {
             placeholder="Search clients by name, email or phone..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyPress={(e) => e.key === "Enter" && handleSearch()}
           />
         </div>
 
         <div className="filter-actions">
+          <button
+            className={`refresh-btn ${refreshing ? "refreshing" : ""}`}
+            onClick={handleRefresh}
+            disabled={refreshing}
+            title="Refresh data"
+          >
+            <FiRefreshCw className={refreshing ? "spin" : ""} />
+          </button>
+
           <button
             className={`filter-toggle-btn ${showFilters ? "active" : ""}`}
             onClick={() => setShowFilters(!showFilters)}
@@ -195,6 +246,7 @@ const Clients = () => {
               setFilterGender("all");
               setFilterStatus("all");
               setSearchTerm("");
+              fetchClients();
             }}
           >
             Clear Filters
@@ -202,7 +254,12 @@ const Clients = () => {
         </div>
       )}
 
-      {viewMode === "grid" ? (
+      {loading || refreshing ? (
+        <div className="loading-container">
+          <div className="spinner"></div>
+          <p>{refreshing ? "Refreshing data..." : "Loading clients..."}</p>
+        </div>
+      ) : viewMode === "grid" ? (
         <div className="clients-grid">
           {filteredClients.map((client) => (
             <div key={client.id} className="client-card">
@@ -212,8 +269,8 @@ const Clients = () => {
                   {client.lastName[0]}
                 </div>
                 <div className="client-status">
-                  <span className={`status-badge ${client.status}`}>
-                    {client.status}
+                  <span className={`status-badge ${client.status || "active"}`}>
+                    {client.status || "active"}
                   </span>
                 </div>
                 <button className="card-menu-btn">
@@ -231,18 +288,18 @@ const Clients = () => {
 
                 <div className="client-contact">
                   <p>
-                    <FiMail /> {client.email}
+                    <FiMail /> {client.email || "—"}
                   </p>
                   <p>
-                    <FiPhone /> {client.phone}
+                    <FiPhone /> {client.phoneNumber || "—"}
                   </p>
                   <p>
-                    <FiMapPin /> {client.city}
+                    <FiMapPin /> {client.city || "—"}
                   </p>
                 </div>
 
                 <div className="client-preferences">
-                  {client.preferredGarments.map((garment, idx) => (
+                  {client.preferredGarments?.map((garment, idx) => (
                     <span key={idx} className="garment-tag">
                       {garment}
                     </span>
@@ -251,12 +308,16 @@ const Clients = () => {
 
                 <div className="client-stats">
                   <div className="stat">
-                    <span className="stat-value">{client.totalSessions}</span>
+                    <span className="stat-value">
+                      {client.sessionCount || 0}
+                    </span>
                     <span className="stat-label">Sessions</span>
                   </div>
                   <div className="stat">
                     <span className="stat-value">
-                      {new Date(client.lastSession).toLocaleDateString()}
+                      {client.lastSessionDate
+                        ? new Date(client.lastSessionDate).toLocaleDateString()
+                        : "—"}
                     </span>
                     <span className="stat-label">Last Session</span>
                   </div>
@@ -268,10 +329,18 @@ const Clients = () => {
                   View Profile →
                 </Link>
                 <div className="client-actions">
-                  <button className="icon-btn">
+                  <Link to={`/clients/${client.id}/edit`} className="icon-btn">
                     <FiEdit2 />
-                  </button>
-                  <button className="icon-btn">
+                  </Link>
+                  <button
+                    className="icon-btn"
+                    onClick={() =>
+                      handleDelete(
+                        client.id,
+                        `${client.firstName} ${client.lastName}`
+                      )
+                    }
+                  >
                     <FiTrash2 />
                   </button>
                 </div>
@@ -318,19 +387,19 @@ const Clients = () => {
                   </td>
                   <td>
                     <div className="contact-info">
-                      <div>{client.email}</div>
-                      <div className="phone">{client.phone}</div>
+                      <div>{client.email || "—"}</div>
+                      <div className="phone">{client.phoneNumber || "—"}</div>
                     </div>
                   </td>
-                  <td>{client.city}</td>
+                  <td>{client.city || "—"}</td>
                   <td>
                     <div className="garment-tags">
-                      {client.preferredGarments.slice(0, 2).map((g, i) => (
+                      {client.preferredGarments?.slice(0, 2).map((g, i) => (
                         <span key={i} className="garment-tag-small">
                           {g}
                         </span>
                       ))}
-                      {client.preferredGarments.length > 2 && (
+                      {client.preferredGarments?.length > 2 && (
                         <span className="garment-tag-small">
                           +{client.preferredGarments.length - 2}
                         </span>
@@ -339,18 +408,22 @@ const Clients = () => {
                   </td>
                   <td>
                     <span className="session-count">
-                      {client.totalSessions}
+                      {client.sessionCount || 0}
                     </span>
                   </td>
                   <td>
                     <div className="last-session">
                       <FiCalendar />
-                      {new Date(client.lastSession).toLocaleDateString()}
+                      {client.lastSessionDate
+                        ? new Date(client.lastSessionDate).toLocaleDateString()
+                        : "—"}
                     </div>
                   </td>
                   <td>
-                    <span className={`status-badge ${client.status}`}>
-                      {client.status}
+                    <span
+                      className={`status-badge ${client.status || "active"}`}
+                    >
+                      {client.status || "active"}
                     </span>
                   </td>
                   <td>
@@ -361,10 +434,21 @@ const Clients = () => {
                       >
                         View
                       </Link>
-                      <button className="action-btn-icon">
+                      <Link
+                        to={`/clients/${client.id}/edit`}
+                        className="action-btn-icon"
+                      >
                         <FiEdit2 />
-                      </button>
-                      <button className="action-btn-icon">
+                      </Link>
+                      <button
+                        className="action-btn-icon"
+                        onClick={() =>
+                          handleDelete(
+                            client.id,
+                            `${client.firstName} ${client.lastName}`
+                          )
+                        }
+                      >
                         <FiTrash2 />
                       </button>
                     </div>
@@ -376,18 +460,79 @@ const Clients = () => {
         </div>
       )}
 
-      {filteredClients.length === 0 && (
+      {/* Empty State - No Clients at All */}
+      {!loading && !refreshing && hasNoClients && (
+        <div className="empty-state">
+          <FiUsers className="empty-state-icon" />
+          <h3>No clients yet</h3>
+          <p>
+            Get started by adding your first client to track their measurements
+            and sessions.
+          </p>
+          <Link to="/clients/new" className="btn btn-primary">
+            <FiPlus /> Add Your First Client
+          </Link>
+        </div>
+      )}
+
+      {/* No Search Results */}
+      {!loading && !refreshing && hasNoSearchResults && (
         <div className="no-results">
-          <p>No clients found matching your criteria</p>
+          <FiSearch className="no-results-icon" />
+          <p>No clients found matching "{searchTerm}"</p>
           <button
             className="btn btn-secondary"
             onClick={() => {
               setSearchTerm("");
+              fetchClients();
+            }}
+          >
+            Clear Search
+          </button>
+        </div>
+      )}
+
+      {/* No Filter Results */}
+      {!loading && !refreshing && hasNoFilterResults && (
+        <div className="no-results">
+          <FiFilter className="no-results-icon" />
+          <p>No clients match the selected filters</p>
+          <button
+            className="btn btn-secondary"
+            onClick={() => {
               setFilterGender("all");
               setFilterStatus("all");
+              fetchClients();
             }}
           >
             Clear Filters
+          </button>
+        </div>
+      )}
+
+      {/* Pagination */}
+      {!loading && !refreshing && pagination.totalPages > 1 && (
+        <div className="pagination">
+          <button
+            onClick={() =>
+              setPagination({ ...pagination, page: pagination.page - 1 })
+            }
+            disabled={pagination.page === 0}
+            className="pagination-btn"
+          >
+            Previous
+          </button>
+          <span className="pagination-info">
+            Page {pagination.page + 1} of {pagination.totalPages}
+          </span>
+          <button
+            onClick={() =>
+              setPagination({ ...pagination, page: pagination.page + 1 })
+            }
+            disabled={pagination.page === pagination.totalPages - 1}
+            className="pagination-btn"
+          >
+            Next
           </button>
         </div>
       )}

@@ -548,6 +548,101 @@
   color: #a63a5f;
 }
 
+/* Refresh Button */
+.refresh-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: white;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.refresh-btn:hover:not(:disabled) {
+  border-color: #d97a9a;
+  background: #f9fafb;
+  color: #a63a5f;
+  transform: rotate(90deg);
+}
+
+.refresh-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.refresh-btn svg {
+  font-size: 1.1rem;
+  transition: transform 0.3s ease;
+}
+
+.refresh-btn.refreshing svg {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Empty State */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 20px;
+  border: 1px solid #e5e7eb;
+  margin-top: 2rem;
+}
+
+.empty-state-icon {
+  font-size: 4rem;
+  color: #d97a9a;
+  margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+  color: #1f2937;
+  margin-bottom: 0.5rem;
+  font-size: 1.5rem;
+}
+
+.empty-state p {
+  color: #6b7280;
+  margin-bottom: 1.5rem;
+}
+
+/* No Results Icons */
+.no-results-icon {
+  font-size: 3rem;
+  color: #9ca3af;
+  margin-bottom: 1rem;
+}
+
+.no-results {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 20px;
+  border: 1px solid #e5e7eb;
+  margin-top: 2rem;
+}
+
+.no-results p {
+  color: #6b7280;
+  font-size: 1.1rem;
+  margin-bottom: 1.5rem;
+}
+
 /* No Results */
 .no-results {
   text-align: center;
