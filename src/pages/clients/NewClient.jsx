@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import toast from "react-hot-toast";
 import {
   FiUser,
   FiMail,
@@ -17,6 +18,7 @@ import {
   FiHeart,
   FiScissors,
 } from "react-icons/fi";
+import { clientService } from "../../services/clientService";
 import "./NewClient.css";
 
 const NewClient = () => {
@@ -27,7 +29,7 @@ const NewClient = () => {
     firstName: "",
     lastName: "",
     email: "",
-    phone: "",
+    phoneNumber: "",
     gender: "",
     dateOfBirth: "",
 
@@ -42,12 +44,6 @@ const NewClient = () => {
     notes: "",
     preferredGarments: [],
     referralSource: "",
-    measurements: {
-      bust: "",
-      waist: "",
-      hip: "",
-      height: "",
-    },
 
     // Photo
     profilePhoto: null,
@@ -97,15 +93,6 @@ const NewClient = () => {
           ? [...prev.preferredGarments, value]
           : prev.preferredGarments.filter((g) => g !== value),
       }));
-    } else if (name.includes(".")) {
-      const [parent, child] = name.split(".");
-      setFormData((prev) => ({
-        ...prev,
-        [parent]: {
-          ...prev[parent],
-          [child]: value,
-        },
-      }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
     }
@@ -123,6 +110,10 @@ const NewClient = () => {
   const handlePhotoChange = (e) => {
     const file = e.target.files[0];
     if (file) {
+      if (file.size > 5 * 1024 * 1024) {
+        toast.error("Image size should be less than 5MB");
+        return;
+      }
       setFormData((prev) => ({ ...prev, profilePhoto: file }));
       const reader = new FileReader();
       reader.onloadend = () => {
@@ -151,10 +142,10 @@ const NewClient = () => {
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
       newErrors.email = "Please enter a valid email";
     }
-    if (!formData.phone) {
-      newErrors.phone = "Phone number is required";
-    } else if (!/^\+?[\d\s-]{10,}$/.test(formData.phone)) {
-      newErrors.phone = "Invalid phone number format";
+    if (!formData.phoneNumber) {
+      newErrors.phoneNumber = "Phone number is required";
+    } else if (!/^\+?[\d\s-]{10,}$/.test(formData.phoneNumber)) {
+      newErrors.phoneNumber = "Invalid phone number format";
     }
     if (!formData.gender) {
       newErrors.gender = "Please select a gender";
@@ -201,6 +192,22 @@ const NewClient = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const uploadPhoto = async (clientId) => {
+    if (!formData.profilePhoto) return;
+
+    const formDataToSend = new FormData();
+    formDataToSend.append("file", formData.profilePhoto);
+    formDataToSend.append("imageType", "PROFILE");
+    formDataToSend.append("description", "Profile picture");
+
+    try {
+      await clientService.uploadImage(clientId, formDataToSend);
+    } catch (error) {
+      console.error("Failed to upload photo:", error);
+      toast.error("Client created but photo upload failed");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -227,16 +234,57 @@ const NewClient = () => {
 
     setLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      // Prepare data for API
+      const clientData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phoneNumber: formData.phoneNumber,
+        gender: formData.gender,
+        dateOfBirth: formData.dateOfBirth || null,
+        address: formData.address,
+        city: formData.city,
+        country: formData.country,
+        postalCode: formData.postalCode || null,
+        notes: formData.notes,
+        preferredGarments: formData.preferredGarments,
+      };
+
+      // Add region as state if the API expects it
+      if (formData.region) {
+        clientData.state = formData.region;
+      }
+
+      const response = await clientService.create(clientData);
+      const newClientId = response.data.data.id;
+
+      // Upload photo if exists
+      if (formData.profilePhoto) {
+        await uploadPhoto(newClientId);
+      }
+
+      toast.success(
+        `✨ Client ${formData.firstName} ${formData.lastName} has been added successfully!`
+      );
+      navigate("/clients");
+    } catch (error) {
+      console.error("Failed to create client:", error);
+
+      // Handle validation errors from backend
+      if (error.response?.data?.errors) {
+        const backendErrors = {};
+        error.response.data.errors.forEach((err) => {
+          backendErrors[err.field] = err.message;
+        });
+        setErrors(backendErrors);
+        setStep(1);
+      } else {
+        toast.error(error.response?.data?.message || "Failed to create client");
+      }
+    } finally {
       setLoading(false);
-      navigate("/clients", {
-        state: {
-          success: true,
-          message: `✨ Client ${formData.firstName} ${formData.lastName} has been added successfully!`,
-        },
-      });
-    }, 2000);
+    }
   };
 
   const pageVariants = {
@@ -416,22 +464,22 @@ const NewClient = () => {
 
                   <div
                     className={`sleek-input-group ${
-                      touched.phone && errors.phone ? "error" : ""
-                    } ${formData.phone ? "filled" : ""}`}
+                      touched.phoneNumber && errors.phoneNumber ? "error" : ""
+                    } ${formData.phoneNumber ? "filled" : ""}`}
                   >
                     <label>
                       <FiPhone /> Phone <span className="required">*</span>
                     </label>
                     <input
                       type="tel"
-                      name="phone"
-                      value={formData.phone}
+                      name="phoneNumber"
+                      value={formData.phoneNumber}
                       onChange={handleChange}
-                      onBlur={() => handleBlur("phone")}
+                      onBlur={() => handleBlur("phoneNumber")}
                       placeholder="+233 24 123 4567"
                     />
-                    {touched.phone && errors.phone && (
-                      <span className="error-text">{errors.phone}</span>
+                    {touched.phoneNumber && errors.phoneNumber && (
+                      <span className="error-text">{errors.phoneNumber}</span>
                     )}
                   </div>
                 </div>
@@ -644,7 +692,7 @@ const NewClient = () => {
 
                 <div className="sleek-consent">
                   <label className="consent-checkbox">
-                    <input type="checkbox" name="consent" />
+                    <input type="checkbox" name="consent" required />
                     <span className="checkmark"></span>
                     <span className="consent-text">
                       I confirm that I have obtained consent to store this
@@ -720,7 +768,7 @@ const NewClient = () => {
               {formData.lastName || "Last Name"}
             </h4>
             <p>{formData.email || "email@example.com"}</p>
-            <p>{formData.phone || "+233 XX XXX XXXX"}</p>
+            <p>{formData.phoneNumber || "+233 XX XXX XXXX"}</p>
           </div>
 
           <div className="preview-details">

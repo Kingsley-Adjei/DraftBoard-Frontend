@@ -118,11 +118,9 @@ const Clients = () => {
   };
 
   const getGenderIcon = (gender) => {
-    return gender === "FEMALE" ? "👩" : "👨";
-  };
-
-  const getStatusBadge = (status) => {
-    return status === "active" ? "badge-success" : "badge-error";
+    if (gender === "FEMALE") return "👩";
+    if (gender === "MALE") return "👨";
+    return "👤";
   };
 
   // Filter clients for search term only (gender/status handled by API)
@@ -265,8 +263,8 @@ const Clients = () => {
             <div key={client.id} className="client-card">
               <div className="client-card-header">
                 <div className="client-avatar" data-gender={client.gender}>
-                  {client.firstName[0]}
-                  {client.lastName[0]}
+                  {client.firstName?.[0]}
+                  {client.lastName?.[0]}
                 </div>
                 <div className="client-status">
                   <span className={`status-badge ${client.status || "active"}`}>
@@ -283,7 +281,8 @@ const Clients = () => {
                   {client.firstName} {client.lastName}
                 </h3>
                 <p className="client-gender">
-                  {getGenderIcon(client.gender)} {client.gender}
+                  {getGenderIcon(client.gender)}{" "}
+                  {client.gender || "Not specified"}
                 </p>
 
                 <div className="client-contact">
@@ -294,7 +293,7 @@ const Clients = () => {
                     <FiPhone /> {client.phoneNumber || "—"}
                   </p>
                   <p>
-                    <FiMapPin /> {client.city || "—"}
+                    <FiMapPin /> {client.city || client.address || "—"}
                   </p>
                 </div>
 
@@ -309,7 +308,9 @@ const Clients = () => {
                 <div className="client-stats">
                   <div className="stat">
                     <span className="stat-value">
-                      {client.sessionCount || 0}
+                      {client.sessionCount ||
+                        client.statistics?.totalSessions ||
+                        0}
                     </span>
                     <span className="stat-label">Sessions</span>
                   </div>
@@ -317,6 +318,8 @@ const Clients = () => {
                     <span className="stat-value">
                       {client.lastSessionDate
                         ? new Date(client.lastSessionDate).toLocaleDateString()
+                        : client.lastSession
+                        ? new Date(client.lastSession).toLocaleDateString()
                         : "—"}
                     </span>
                     <span className="stat-label">Last Session</span>
@@ -372,15 +375,16 @@ const Clients = () => {
                         className="client-avatar-small"
                         data-gender={client.gender}
                       >
-                        {client.firstName[0]}
-                        {client.lastName[0]}
+                        {client.firstName?.[0]}
+                        {client.lastName?.[0]}
                       </div>
                       <div>
                         <div className="client-name">
                           {client.firstName} {client.lastName}
                         </div>
                         <div className="client-gender-small">
-                          {getGenderIcon(client.gender)} {client.gender}
+                          {getGenderIcon(client.gender)}{" "}
+                          {client.gender || "Not specified"}
                         </div>
                       </div>
                     </div>
@@ -391,7 +395,7 @@ const Clients = () => {
                       <div className="phone">{client.phoneNumber || "—"}</div>
                     </div>
                   </td>
-                  <td>{client.city || "—"}</td>
+                  <td>{client.city || client.address || "—"}</td>
                   <td>
                     <div className="garment-tags">
                       {client.preferredGarments?.slice(0, 2).map((g, i) => (
@@ -408,7 +412,9 @@ const Clients = () => {
                   </td>
                   <td>
                     <span className="session-count">
-                      {client.sessionCount || 0}
+                      {client.sessionCount ||
+                        client.statistics?.totalSessions ||
+                        0}
                     </span>
                   </td>
                   <td>
@@ -416,6 +422,8 @@ const Clients = () => {
                       <FiCalendar />
                       {client.lastSessionDate
                         ? new Date(client.lastSessionDate).toLocaleDateString()
+                        : client.lastSession
+                        ? new Date(client.lastSession).toLocaleDateString()
                         : "—"}
                     </div>
                   </td>
