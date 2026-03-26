@@ -297,13 +297,15 @@ const Clients = () => {
       {showFilters && (
         <>
           <div className="advanced-filters">
-            <div style={{
-              display: "flex",
-              flexDirection: "row",
-              alignItems: "center",
-              justifyContent: "flex-start",
-              gap: "2rem",
-            }}>
+            <div
+              style={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                justifyContent: "flex-start",
+                gap: "2rem",
+              }}
+            >
               <div className="filter-group">
                 <label>Gender:</label>
                 <select
@@ -483,7 +485,6 @@ const Clients = () => {
                     <th>Client</th>
                     <th>Contact</th>
                     <th>Location</th>
-                    <th>Preferred Garments</th>
                     <th>Sessions</th>
                     <th>Last Session</th>
                     <th>Status</th>
@@ -536,20 +537,6 @@ const Clients = () => {
                         </div>
                       </td>
                       <td>{client.city || client.address || "—"}</td>
-                      <td>
-                        <div className="garment-tags">
-                          {client.preferredGarments?.slice(0, 2).map((g, i) => (
-                            <span key={i} className="garment-tag-small">
-                              {g}
-                            </span>
-                          ))}
-                          {client.preferredGarments?.length > 2 && (
-                            <span className="garment-tag-small">
-                              +{client.preferredGarments.length - 2}
-                            </span>
-                          )}
-                        </div>
-                      </td>
                       <td>
                         <span className="session-count">
                           {client.sessionCount ||
