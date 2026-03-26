@@ -26,6 +26,7 @@ import CompanyDetails from "./pages/companies/CompanyDetails";
 import Clients from "./pages/clients/Clients";
 import ClientDetails from "./pages/clients/ClientDetails";
 import NewClient from "./pages/clients/NewClient";
+import EditClient from "./pages/clients/EditClient";
 import Sessions from "./pages/sessions/Sessions";
 import SessionDetails from "./pages/sessions/SessionDetails";
 import NewSession from "./pages/sessions/NewSession";
@@ -80,6 +81,7 @@ const AppLayout = () => {
             <Route path="/clients" element={<Clients />} />
             <Route path="/clients/:id" element={<ClientDetails />} />
             <Route path="/clients/new" element={<NewClient />} />
+            <Route path="/clients/:id/edit" element={<EditClient />} />
 
             {/* Session Routes */}
             <Route path="/sessions" element={<Sessions />} />

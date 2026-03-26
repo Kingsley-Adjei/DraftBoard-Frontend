@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import toast from "react-hot-toast";
 import {
@@ -17,13 +17,17 @@ import {
   FiX,
   FiHeart,
   FiScissors,
+  FiLoader,
 } from "react-icons/fi";
 import { clientService } from "../../services/clientService";
 import "./NewClient.css";
 
-const NewClient = () => {
+const EditClient = () => {
+  const { id } = useParams();
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
     // Personal Information
     firstName: "",
@@ -50,9 +54,9 @@ const NewClient = () => {
   });
 
   const [errors, setErrors] = useState({});
-  const [loading, setLoading] = useState(false);
   const [photoPreview, setPhotoPreview] = useState(null);
   const [touched, setTouched] = useState({});
+  const [existingImages, setExistingImages] = useState([]);
 
   const garmentOptions = [
     { id: "SHIRT", label: "Shirt", icon: "👔" },
@@ -82,6 +86,54 @@ const NewClient = () => {
     "Oti",
     "Western North",
   ];
+
+  useEffect(() => {
+    fetchClientData();
+  }, [id]);
+
+  const fetchClientData = async () => {
+    setLoading(true);
+    try {
+      const response = await clientService.getById(id);
+      const client = response.data.data;
+
+      // Populate form data
+      setFormData({
+        firstName: client.firstName || "",
+        lastName: client.lastName || "",
+        email: client.email || "",
+        phoneNumber: client.phoneNumber || "",
+        gender: client.gender || "",
+        dateOfBirth: client.dateOfBirth || "",
+        address: client.address || "",
+        city: client.city || "",
+        region: client.state || client.region || "",
+        country: client.country || "Ghana",
+        postalCode: client.postalCode || "",
+        notes: client.notes || "",
+        preferredGarments: client.preferredGarments || [],
+        referralSource: client.referralSource || "",
+        profilePhoto: null,
+      });
+
+      // Set photo preview if exists
+      if (client.images && client.images.length > 0) {
+        const profileImage = client.images.find(
+          (img) => img.imageType === "PROFILE"
+        );
+        if (profileImage) {
+          setPhotoPreview(profileImage.imageUrl);
+          setExistingImages(client.images);
+        }
+      }
+    } catch (error) {
+      console.error("Failed to fetch client:", error);
+      toast.error("Failed to load client data");
+      navigate("/clients");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -177,7 +229,6 @@ const NewClient = () => {
       window.scrollTo({ top: 0, behavior: "smooth" });
     } else {
       setErrors(stepErrors);
-      // Mark all fields as touched to show errors
       const allTouched = {};
       Object.keys(stepErrors).forEach((key) => {
         allTouched[key] = true;
@@ -192,7 +243,7 @@ const NewClient = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  const uploadPhoto = async (clientId) => {
+  const uploadNewPhoto = async (clientId) => {
     if (!formData.profilePhoto) return;
 
     const formDataToSend = new FormData();
@@ -204,7 +255,7 @@ const NewClient = () => {
       await clientService.uploadImage(clientId, formDataToSend);
     } catch (error) {
       console.error("Failed to upload photo:", error);
-      toast.error("Client created but photo upload failed");
+      toast.error("Client updated but photo upload failed");
     }
   };
 
@@ -232,7 +283,7 @@ const NewClient = () => {
       return;
     }
 
-    setLoading(true);
+    setSaving(true);
 
     try {
       // Prepare data for API
@@ -256,20 +307,19 @@ const NewClient = () => {
         clientData.state = formData.region;
       }
 
-      const response = await clientService.create(clientData);
-      const newClientId = response.data.data.id;
+      await clientService.update(id, clientData);
 
-      // Upload photo if exists
+      // Upload new photo if exists
       if (formData.profilePhoto) {
-        await uploadPhoto(newClientId);
+        await uploadNewPhoto(id);
       }
 
       toast.success(
-        `✨ Client ${formData.firstName} ${formData.lastName} has been added successfully!`
+        `✨ Client ${formData.firstName} ${formData.lastName} has been updated successfully!`
       );
-      navigate("/clients");
+      navigate(`/clients/${id}`);
     } catch (error) {
-      console.error("Failed to create client:", error);
+      console.error("Failed to update client:", error);
 
       // Handle validation errors from backend
       if (error.response?.data?.errors) {
@@ -280,10 +330,10 @@ const NewClient = () => {
         setErrors(backendErrors);
         setStep(1);
       } else {
-        toast.error(error.response?.data?.message || "Failed to create client");
+        toast.error(error.response?.data?.message || "Failed to update client");
       }
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
@@ -292,6 +342,17 @@ const NewClient = () => {
     animate: { opacity: 1, x: 0 },
     exit: { opacity: 0, x: 20 },
   };
+
+  if (loading) {
+    return (
+      <div className="sleek-new-client-page">
+        <div className="loading-container">
+          <div className="spinner"></div>
+          <p>Loading client data...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="sleek-new-client-page">
@@ -303,13 +364,13 @@ const NewClient = () => {
       </div>
 
       <div className="sleek-header">
-        <Link to="/clients" className="sleek-back-btn">
+        <Link to={`/clients/${id}`} className="sleek-back-btn">
           <FiArrowLeft />
-          <span>Back to Clients</span>
+          <span>Back to Profile</span>
         </Link>
-        <h1>Add New Client</h1>
+        <h1>Edit Client</h1>
         <p className="sleek-subtitle">
-          Enter client information to create a new profile
+          Update {formData.firstName} {formData.lastName}'s information
         </p>
       </div>
 
@@ -383,7 +444,8 @@ const NewClient = () => {
                   </div>
                   <div className="sleek-photo-upload">
                     <label htmlFor="photo" className="photo-upload-btn">
-                      <FiCamera /> Upload Photo
+                      <FiCamera />{" "}
+                      {photoPreview ? "Change Photo" : "Upload Photo"}
                     </label>
                     <input
                       type="file"
@@ -516,7 +578,11 @@ const NewClient = () => {
                     <input
                       type="date"
                       name="dateOfBirth"
-                      value={formData.dateOfBirth}
+                      value={
+                        formData.dateOfBirth?.split("T")[0] ||
+                        formData.dateOfBirth ||
+                        ""
+                      }
                       onChange={handleChange}
                     />
                   </div>
@@ -661,7 +727,7 @@ const NewClient = () => {
 
                 <div className="sleek-form-grid">
                   <div className="sleek-select-group">
-                    <label>How did you hear about us?</label>
+                    <label>How did they hear about us?</label>
                     <select
                       name="referralSource"
                       value={formData.referralSource}
@@ -689,17 +755,6 @@ const NewClient = () => {
                     rows="4"
                   />
                 </div>
-
-                <div className="sleek-consent">
-                  <label className="consent-checkbox">
-                    <input type="checkbox" name="consent" required />
-                    <span className="checkmark"></span>
-                    <span className="consent-text">
-                      I confirm that I have obtained consent to store this
-                      client's information
-                    </span>
-                  </label>
-                </div>
               </div>
             )}
 
@@ -709,7 +764,7 @@ const NewClient = () => {
                   type="button"
                   className="sleek-btn sleek-btn-secondary"
                   onClick={handleBack}
-                  disabled={loading}
+                  disabled={saving}
                 >
                   <FiChevronLeft /> Back
                 </button>
@@ -718,13 +773,15 @@ const NewClient = () => {
               <button
                 type="submit"
                 className="sleek-btn sleek-btn-primary"
-                disabled={loading}
+                disabled={saving}
               >
-                {loading ? (
-                  <span className="sleek-spinner"></span>
+                {saving ? (
+                  <>
+                    <FiLoader className="spinning" /> Saving...
+                  </>
                 ) : step === 3 ? (
                   <>
-                    <FiSave /> Create Client
+                    <FiSave /> Save Changes
                   </>
                 ) : (
                   <>
@@ -745,7 +802,7 @@ const NewClient = () => {
         >
           <div className="preview-header">
             <h3>Live Preview</h3>
-            <span className="preview-badge">Draft</span>
+            <span className="preview-badge">Editing</span>
           </div>
 
           <div className="preview-avatar">
@@ -761,6 +818,7 @@ const NewClient = () => {
               </div>
             )}
           </div>
+
           <div className="preview-info">
             <h4>
               {formData.firstName || "First Name"}{" "}
@@ -769,6 +827,7 @@ const NewClient = () => {
             <p>{formData.email || "email@example.com"}</p>
             <p>{formData.phoneNumber || "+233 XX XXX XXXX"}</p>
           </div>
+
           <div className="preview-details">
             <div className="preview-detail-item">
               <FiMapPin />
@@ -793,9 +852,10 @@ const NewClient = () => {
               </div>
             )}
           </div>
+
           {step === 3 && (
             <div className="preview-ready">
-              <FiCheck /> Ready to create
+              <FiCheck /> Ready to save changes
             </div>
           )}
         </motion.div>
@@ -804,4 +864,4 @@ const NewClient = () => {
   );
 };
 
-export default NewClient;
+export default EditClient;

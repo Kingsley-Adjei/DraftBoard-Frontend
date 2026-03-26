@@ -263,8 +263,17 @@ const Clients = () => {
             <div key={client.id} className="client-card">
               <div className="client-card-header">
                 <div className="client-avatar" data-gender={client.gender}>
-                  {client.firstName?.[0]}
-                  {client.lastName?.[0]}
+                  {client.profileImageUrl ? (
+                    <img
+                      src={client.profileImageUrl}
+                      alt={`${client.firstName} ${client.lastName}`}
+                    />
+                  ) : (
+                    <>
+                      {client.firstName?.[0]}
+                      {client.lastName?.[0]}
+                    </>
+                  )}
                 </div>
                 <div className="client-status">
                   <span className={`status-badge ${client.status || "active"}`}>
@@ -375,8 +384,17 @@ const Clients = () => {
                         className="client-avatar-small"
                         data-gender={client.gender}
                       >
-                        {client.firstName?.[0]}
-                        {client.lastName?.[0]}
+                        {client.profileImageUrl ? (
+                          <img
+                            src={client.profileImageUrl}
+                            alt={`${client.firstName} ${client.lastName}`}
+                          />
+                        ) : (
+                          <>
+                            {client.firstName?.[0]}
+                            {client.lastName?.[0]}
+                          </>
+                        )}
                       </div>
                       <div>
                         <div className="client-name">
