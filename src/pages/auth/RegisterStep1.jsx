@@ -245,7 +245,12 @@ export default function RegisterStep1({
 
         {/* Right Panel */}
         <div className="db-right">
-          <div className="db-card">
+          <div
+            className="db-card"
+            style={{
+              marginTop: "7rem",
+            }}
+          >
             <div className="db-header">
               <div className="welcome-header">
                 <h1 className="db-logo">Join us on </h1>

@@ -10,7 +10,7 @@ const SLIDES = [
       "https://images.unsplash.com/photo-1558769132-cb1aea458c5e?w=900&q=80",
     tagline: (
       <>
-        Welcome To <strong>FitFolio</strong>, Where <strong>Tradition</strong>{" "}
+        Welcome To <strong>DraftBoard</strong>, Where <strong>Tradition</strong>{" "}
         Meets <strong>Precision</strong> In Every <strong>Stitch</strong>
       </>
     ),
@@ -220,7 +220,12 @@ export default function SignIn() {
       <div className="db-card-wrapper">
         <Carousel />
         <div className="db-right">
-          <div className="db-card">
+          <div
+            className="db-card"
+            style={{
+              marginTop: "3rem",
+            }}
+          >
             <div className="db-header">
               <div className="welcome-header">
                 <h1 className="db-logo">Sign in to </h1>

@@ -12,7 +12,8 @@ import Header from "./layout/Header";
 // Auth Pages
 import SignIn from "./pages/auth/SignIn";
 import Register from "./pages/auth/Register";
-/* import ForgotPassword from "./pages/auth/ForgotPassword";
+import ForgotPassword from "./pages/auth/ForgotPassword";
+/*
 import ResetPassword from "./pages/auth/ResetPassword";
 import VerifyEmail from "./pages/auth/VerifyEmail";
 import InvitationAccept from "./pages/auth/InvitationAccept";
@@ -143,7 +144,8 @@ function App() {
                 element={<Navigate to="/signin" replace />}
               />
               <Route path="/register" element={<Register />} />
-              {/*  <Route path="/forgot-password" element={<ForgotPassword />} />
+              <Route path="/forgot-password" element={<ForgotPassword />} />
+              {/*  
               <Route path="/reset-password" element={<ResetPassword />} />
               <Route path="/verify-email" element={<VerifyEmail />} />
               <Route path="/invite/:token" element={<InvitationAccept />} />

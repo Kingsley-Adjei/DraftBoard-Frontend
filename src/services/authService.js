@@ -9,7 +9,11 @@ export const authService = {
     api.post("/auth/refresh-token", { refreshToken }),
   getCurrentUser: () => api.get("/auth/me"),
   updateProfile: (data) => api.put("/auth/me", data),
-  forgotPassword: (email) => api.post("/auth/forgot-password", { email }),
+  forgotPassword: (email) => {
+    console.log("Sending forgot password request with email:", email);
+    console.log("Request body:", { email });
+    return api.post("/auth/forgot-password", { email });
+  },
   resetPassword: (token, newPassword) =>
     api.post("/auth/reset-password", { token, newPassword }),
   verifyEmail: (token) => api.post("/auth/verify-email", { token }),
