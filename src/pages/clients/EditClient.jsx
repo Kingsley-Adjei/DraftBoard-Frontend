@@ -57,6 +57,7 @@ const EditClient = () => {
   const [photoPreview, setPhotoPreview] = useState(null);
   const [touched, setTouched] = useState({});
   const [existingImages, setExistingImages] = useState([]);
+  const [existingProfileImageId, setExistingProfileImageId] = useState(null);
 
   const garmentOptions = [
     { id: "SHIRT", label: "Shirt", icon: "👔" },
@@ -116,15 +117,20 @@ const EditClient = () => {
         profilePhoto: null,
       });
 
-      // Set photo preview if exists
-      if (client.images && client.images.length > 0) {
-        const profileImage = client.images.find(
-          (img) => img.imageType === "PROFILE"
-        );
-        if (profileImage) {
-          setPhotoPreview(profileImage.imageUrl);
-          setExistingImages(client.images);
-        }
+      // Fetch images separately to ensure we have the latest
+      const imagesResponse = await clientService.getImages(id);
+      const allImages = imagesResponse.data.data || [];
+      setExistingImages(allImages);
+
+      // Find profile image
+      const profileImage = allImages.find((img) => img.imageType === "PROFILE");
+      if (profileImage) {
+        setExistingProfileImageId(profileImage.id);
+        // Construct full image URL
+        const imageUrl = profileImage.imageUrl.startsWith("http")
+          ? profileImage.imageUrl
+          : `http://localhost:8080${profileImage.imageUrl}`;
+        setPhotoPreview(imageUrl);
       }
     } catch (error) {
       console.error("Failed to fetch client:", error);
@@ -243,6 +249,17 @@ const EditClient = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
+  const deleteExistingProfilePhoto = async () => {
+    if (existingProfileImageId) {
+      try {
+        await clientService.deleteImage(id, existingProfileImageId);
+        console.log("✅ Old profile photo deleted");
+      } catch (error) {
+        console.error("Failed to delete old photo:", error);
+      }
+    }
+  };
+
   const uploadNewPhoto = async (clientId) => {
     if (!formData.profilePhoto) return;
 
@@ -253,9 +270,12 @@ const EditClient = () => {
 
     try {
       await clientService.uploadImage(clientId, formDataToSend);
+      console.log("✅ New photo uploaded successfully");
+      return true;
     } catch (error) {
       console.error("Failed to upload photo:", error);
       toast.error("Client updated but photo upload failed");
+      return false;
     }
   };
 
@@ -307,11 +327,24 @@ const EditClient = () => {
         clientData.state = formData.region;
       }
 
+      // Update client
       await clientService.update(id, clientData);
 
-      // Upload new photo if exists
+      // Handle photo upload - delete old and upload new
       if (formData.profilePhoto) {
+        // Delete existing profile photo if it exists
+        if (existingProfileImageId) {
+          await deleteExistingProfilePhoto();
+        }
+        // Upload new photo
         await uploadNewPhoto(id);
+      } else if (
+        !formData.profilePhoto &&
+        photoPreview &&
+        !photoPreview.startsWith("data:")
+      ) {
+        // Keep existing photo, do nothing
+        console.log("Keeping existing photo");
       }
 
       toast.success(
@@ -427,7 +460,18 @@ const EditClient = () => {
                   <div className="sleek-photo-preview">
                     {photoPreview ? (
                       <>
-                        <img src={photoPreview} alt="Profile" />
+                        <img
+                          src={photoPreview}
+                          alt="Profile"
+                          onError={(e) => {
+                            console.error(
+                              "Failed to load image:",
+                              photoPreview
+                            );
+                            e.target.style.display = "none";
+                            setPhotoPreview(null);
+                          }}
+                        />
                         <button
                           type="button"
                           className="photo-remove"
@@ -455,6 +499,11 @@ const EditClient = () => {
                       className="photo-input"
                     />
                     <span className="photo-hint">Optional • Max 5MB</span>
+                    {photoPreview && (
+                      <span className="photo-hint" style={{ color: "#10b981" }}>
+                        ✓ Current photo will be replaced
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -807,7 +856,24 @@ const EditClient = () => {
 
           <div className="preview-avatar">
             {photoPreview ? (
-              <img src={photoPreview} alt="Preview" />
+              <img
+                src={photoPreview}
+                alt="Preview"
+                onError={(e) => {
+                  console.error("Preview image failed to load:", photoPreview);
+                  e.target.style.display = "none";
+                  // Show placeholder instead
+                  e.target.parentElement.innerHTML = `
+                    <div class="preview-avatar-placeholder">
+                      ${
+                        formData.firstName && formData.lastName
+                          ? `${formData.firstName[0]}${formData.lastName[0]}`
+                          : '<svg stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 24 24" height="2rem" width="2rem" xmlns="http://www.w3.org/2000/svg"><path fill="none" d="M0 0h24v24H0z"></path><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"></path></svg>'
+                      }
+                    </div>
+                  `;
+                }}
+              />
             ) : (
               <div className="preview-avatar-placeholder">
                 {formData.firstName && formData.lastName ? (

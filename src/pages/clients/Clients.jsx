@@ -27,6 +27,7 @@ const Clients = () => {
   const [viewMode, setViewMode] = useState("grid");
   const [showFilters, setShowFilters] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+  const [clientImages, setClientImages] = useState({});
   const [pagination, setPagination] = useState({
     page: 0,
     size: 12,
@@ -55,12 +56,17 @@ const Clients = () => {
         status: filterStatus !== "all" ? filterStatus : undefined,
       };
       const response = await clientService.getAll(params);
-      setClients(response.data.data.content);
+      const clientsData = response.data.data.content;
+      setClients(clientsData);
       setPagination({
         ...pagination,
         totalPages: response.data.data.totalPages,
         totalElements: response.data.data.totalElements,
       });
+
+      // Fetch images for all clients
+      await fetchImagesForClients(clientsData);
+
       if (showRefreshAnimation) {
         toast.success("Data refreshed successfully");
       }
@@ -74,6 +80,32 @@ const Clients = () => {
         setLoading(false);
       }
     }
+  };
+
+  const fetchImagesForClients = async (clientsData) => {
+    const imagesMap = {};
+
+    // Fetch images in parallel for better performance
+    const imagePromises = clientsData.map(async (client) => {
+      try {
+        const response = await clientService.getImages(client.id);
+        const profileImage = response.data.data?.find(
+          (img) => img.imageType === "PROFILE"
+        );
+        if (profileImage) {
+          // Construct full image URL
+          const imageUrl = profileImage.imageUrl.startsWith("http")
+            ? profileImage.imageUrl
+            : `http://localhost:8080${profileImage.imageUrl}`;
+          imagesMap[client.id] = imageUrl;
+        }
+      } catch (error) {
+        console.error(`Failed to fetch image for client ${client.id}:`, error);
+      }
+    });
+
+    await Promise.all(imagePromises);
+    setClientImages(imagesMap);
   };
 
   const handleRefresh = () => {
@@ -91,7 +123,9 @@ const Clients = () => {
         page: 0,
         size: 20,
       });
-      setClients(response.data.data.content);
+      const searchResults = response.data.data.content;
+      setClients(searchResults);
+      await fetchImagesForClients(searchResults);
     } catch (error) {
       console.error("Search failed:", error);
       toast.error("Search failed");
@@ -263,10 +297,15 @@ const Clients = () => {
             <div key={client.id} className="client-card">
               <div className="client-card-header">
                 <div className="client-avatar" data-gender={client.gender}>
-                  {client.profileImageUrl ? (
+                  {clientImages[client.id] ? (
                     <img
-                      src={client.profileImageUrl}
+                      src={clientImages[client.id]}
                       alt={`${client.firstName} ${client.lastName}`}
+                      style={{
+                        width: "100%",
+                        height: "100%",
+                        objectFit: "cover",
+                      }}
                     />
                   ) : (
                     <>
@@ -384,10 +423,15 @@ const Clients = () => {
                         className="client-avatar-small"
                         data-gender={client.gender}
                       >
-                        {client.profileImageUrl ? (
+                        {clientImages[client.id] ? (
                           <img
-                            src={client.profileImageUrl}
+                            src={clientImages[client.id]}
                             alt={`${client.firstName} ${client.lastName}`}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                            }}
                           />
                         ) : (
                           <>

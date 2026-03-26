@@ -27,6 +27,7 @@ const ClientDetails = () => {
   const [sessions, setSessions] = useState([]);
   const [measurements, setMeasurements] = useState([]);
   const [images, setImages] = useState([]);
+  const [profileImage, setProfileImage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [deleting, setDeleting] = useState(false);
   const [statistics, setStatistics] = useState({
@@ -44,15 +45,15 @@ const ClientDetails = () => {
   const fetchClientDetails = async () => {
     try {
       const response = await clientService.getById(id);
-      setClient(response.data.data);
+      const clientData = response.data.data;
+      setClient(clientData);
 
       // Update statistics from response
-      if (response.data.data.statistics) {
+      if (clientData.statistics) {
         setStatistics({
-          totalSessions: response.data.data.statistics.totalSessions || 0,
-          totalMeasurements:
-            response.data.data.statistics.totalMeasurements || 0,
-          totalImages: response.data.data.statistics.totalImages || 0,
+          totalSessions: clientData.statistics.totalSessions || 0,
+          totalMeasurements: clientData.statistics.totalMeasurements || 0,
+          totalImages: clientData.statistics.totalImages || 0,
         });
       }
     } catch (error) {
@@ -79,7 +80,6 @@ const ClientDetails = () => {
       }));
     } catch (error) {
       console.error("Failed to fetch sessions:", error);
-      // Don't show error toast for sessions, just set empty array
       setSessions([]);
     }
   };
@@ -87,11 +87,21 @@ const ClientDetails = () => {
   const fetchClientImages = async () => {
     try {
       const response = await clientService.getImages(id);
-      setImages(response.data.data || []);
+      const allImages = response.data.data || [];
+      setImages(allImages);
+
+      // Find profile image
+      const profileImg = allImages.find((img) => img.imageType === "PROFILE");
+      if (profileImg) {
+        const imageUrl = profileImg.imageUrl.startsWith("http")
+          ? profileImg.imageUrl
+          : `http://localhost:8080${profileImg.imageUrl}`;
+        setProfileImage(imageUrl);
+      }
 
       setStatistics((prev) => ({
         ...prev,
-        totalImages: response.data.data?.length || 0,
+        totalImages: allImages.length || 0,
       }));
     } catch (error) {
       console.error("Failed to fetch images:", error);
@@ -211,8 +221,18 @@ const ClientDetails = () => {
 
       <div className="client-profile-header">
         <div className="client-avatar-large">
-          {client.firstName?.[0]}
-          {client.lastName?.[0]}
+          {profileImage ? (
+            <img
+              src={profileImage}
+              alt={`${client.firstName} ${client.lastName}`}
+              style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            />
+          ) : (
+            <>
+              {client.firstName?.[0]}
+              {client.lastName?.[0]}
+            </>
+          )}
         </div>
         <div className="client-quick-info">
           <div className="info-item">
@@ -532,8 +552,9 @@ const ClientDetails = () => {
                   <div key={image.id} className="image-item">
                     <img
                       src={
-                        image.imageUrl ||
-                        `http://localhost:8080${image.imageUrl}`
+                        image.imageUrl.startsWith("http")
+                          ? image.imageUrl
+                          : `http://localhost:8080${image.imageUrl}`
                       }
                       alt={image.imageType}
                     />
